@@ -1,34 +1,54 @@
 services:
+  # MySQL
   db:
     image: mysql:8.0
     container_name: verification_db
+    # 各変数はMySQLの公式イメージの仕様
     environment:
+      # シェル(bash)の変数展開構文 
+      # ${変数名:-デフォルト値}
+      # 左辺 環境変数名
+      # :- なければ という区切り
+      # 右辺 デフォルト値 
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      # 初回起動時にのみ認識する環境変数
       MYSQL_DATABASE: ${MYSQL_DATABASE:-verification_db}
       MYSQL_USER: ${MYSQL_USER:-appuser}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-apppassword}
     ports:
       - "3307:3306"
     volumes:
+      # 名前付きボリューム。MySQLの実データを永続化
       - mysql_data:/var/lib/mysql
+      # バインドマウント: ホストの実ファイル→コンテナ
       - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    # ヘルスチェック: MySQLが起動しているかを確認するための設定
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      # 10秒ごとにmysqladmin plugを実行
       interval: 10s
+      # 5秒以内に応答がなければ失敗扱い
       timeout: 5s
+      # 5連続失敗で unhealthy 判定
       retries: 5
 
+  # サービスとの連携
+  # Spring Boot
   app:
     build: .
     container_name: verification_app
     ports:
       - "8080:8080"
     environment:
+      # localhostではなく、docker-compose.ymlのサービス名(db)を指定することで
+      # コンテナ間通信が可能になる
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE:-verification_db}
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-appuser}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-apppassword}
     depends_on:
       db:
+      # depends_onのconditionを指定することで、依存関係のサービスが起動しているかどうかを確認する
+      # dbサービスがhealthy状態になるまで待機
         condition: service_healthy
 
 volumes:

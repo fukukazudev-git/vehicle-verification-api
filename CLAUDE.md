@@ -1,6 +1,20 @@
-## アーキテクチャルール
-- Controllerはリクエスト受付とレスポンス返却のみ。ビジネスロジックはServiceに書く
-- 例外はカスタム例外クラス + @ControllerAdviceで一元管理する
-- リクエストのバリデーションは@Validとアノテーションベースで必ず行う
-- 各層の責務を越える実装をしないこと
-- 使用IDEは VSCode
+# アーキテクチャルール
+
+## レイヤー構造
+- Controller: リクエスト受付・レスポンス返却のみ。ビジネスロジック禁止
+- Service: ビジネスロジックはここに書く。インターフェースとImplに分ける
+- Repository: JpaRepositoryを継承したインターフェースのみ
+- Entity: DBテーブルとのマッピングのみ。ロジック禁止
+
+## 必須ルール
+- バリデーションは@ValidとBean Validationアノテーションで行う
+- 例外処理は@ControllerAdviceで一元管理する
+- Controllerに@Autowiredは使わない（コンストラクタインジェクション）
+- ServiceImplに@Transactionalをつける
+
+## パッケージ構成
+com.example.vehicleverification
+├── domain/entity/
+├── domain/repository/
+├── application/service/
+└── presentation/controller/
