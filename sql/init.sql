@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS models (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     model_code VARCHAR(50) NOT NULL UNIQUE,
     model_name VARCHAR(100) NOT NULL,
-    model_year YEAR,
+    model_year INT,
     ecu_type VARCHAR(50),
     engine_type VARCHAR(50),
     drive_type VARCHAR(20),
