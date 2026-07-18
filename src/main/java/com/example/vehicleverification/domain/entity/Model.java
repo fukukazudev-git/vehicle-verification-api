@@ -3,6 +3,7 @@ package com.example.vehicleverification.domain.entity;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
+import jakarta.persistence.Version;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,29 +27,35 @@ public class Model {
     private Long id;
 
     @NotNull
-    @Size(max = 50)
+    @Size(max = 10, min = 3)
     private String modelCode;
 
     @NotNull
-    @Size(max = 100)
+    @Size(max = 20)
     private String modelName;
 
+    @NotNull
+    @Size(max = 4)
     private Integer modelYear;
 
-    @Size(max = 50)
+    @Size(max = 20)
     private String ecuType;
 
-    @Size(max = 50)
+    @Size(max = 20)
     private String engineType;
 
-    @Size(max = 50)
+    @Size(max = 10)
     private String driveType;
 
+    @Size(max = 500)
     private String description;
 
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
+
+    @Version
+    private Long version;
 
     protected Model() {
     }

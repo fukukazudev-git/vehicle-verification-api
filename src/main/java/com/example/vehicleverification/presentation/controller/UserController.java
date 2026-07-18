@@ -3,9 +3,10 @@ package com.example.vehicleverification.presentation.controller;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import com.example.vehicleverification.application.service.UserService;
-import com.example.vehicleverification.dto.user.*;
+import com.example.vehicleverification.presentation.dto.user.*;
 
 @RestController
 @RequestMapping("/api/users")
@@ -29,7 +30,7 @@ public class UserController {
     }
 
     @PostMapping
-    public UserCreateResponse createUser(@RequestBody UserCreateRequest request) {
+    public UserCreateResponse createUser(@Valid @RequestBody UserCreateRequest request) {
         return userService.createUser(request);
     }
 

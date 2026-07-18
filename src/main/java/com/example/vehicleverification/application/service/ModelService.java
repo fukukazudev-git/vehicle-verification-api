@@ -2,8 +2,7 @@ package com.example.vehicleverification.application.service;
 
 import java.util.List;
 
-import com.example.vehicleverification.dto.model.ModelDto;
-import com.example.vehicleverification.dto.model.*;
+import com.example.vehicleverification.presentation.dto.model.*;
 
 public interface ModelService {
 

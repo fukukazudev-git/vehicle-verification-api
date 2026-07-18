@@ -5,6 +5,7 @@
 - Service: ビジネスロジックはここに書く。インターフェースとImplに分ける
 - Repository: JpaRepositoryを継承したインターフェースのみ
 - Entity: DBテーブルとのマッピングのみ。ロジック禁止
+- Infrastructure: フレームワーク・外部連携の設定（Spring Securityなどの@Configuration）を置く
 
 ## 必須ルール
 - バリデーションは@ValidとBean Validationアノテーションで行う
@@ -17,4 +18,6 @@ com.example.vehicleverification
 ├── domain/entity/
 ├── domain/repository/
 ├── application/service/
-└── presentation/controller/
+├── presentation/controller/
+├── dto/
+└── infrastructure/config/

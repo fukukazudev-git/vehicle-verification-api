@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.vehicleverification.application.service.ModelService;
-import com.example.vehicleverification.dto.model.*;
+import com.example.vehicleverification.presentation.dto.model.*;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/models")
@@ -29,14 +31,14 @@ public class ModelController {
     }
 
     @PostMapping
-    public ModelCreateResponse createModel(@RequestBody ModelCreateRequest request) {
+    public ModelCreateResponse createModel(@Valid @RequestBody ModelCreateRequest request) {
         return modelService.createModel(request);
     }
 
     @PutMapping("/{id}")
     public ModelUpdateResponse updateModel(
             @PathVariable Long id,
-            @RequestBody ModelUpdateRequest request) {
+            @Valid @RequestBody ModelUpdateRequest request) {
         return modelService.updateModel(id, request);
     }
 

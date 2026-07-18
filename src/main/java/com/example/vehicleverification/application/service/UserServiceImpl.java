@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.vehicleverification.domain.entity.User;
 import com.example.vehicleverification.domain.repository.UserRepository;
-import com.example.vehicleverification.dto.user.*;
+import com.example.vehicleverification.presentation.dto.user.*;
 
 import jakarta.transaction.Transactional;
 
