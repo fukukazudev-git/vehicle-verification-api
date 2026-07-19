@@ -1,24 +1,34 @@
 package com.example.vehicleverification.presentation.advice;
 
-import jakarta.persistence.OptimisticLockException;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import java.util.List;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.presentation.dto.error.ErrorResponse;
 import com.example.vehicleverification.presentation.dto.error.FieldValidationError;
 
+import jakarta.persistence.OptimisticLockException;
 import jakarta.servlet.http.HttpServletRequest;
 
+// ResponseEntityExceptionHandlerを継承することで、Spring MVCが投げる標準例外
+// (型変換失敗・JSONパース失敗・未対応メソッドなど)が基底クラスの個別ハンドラに
+// マッチするようになる。継承しない場合、下のhandleExceptionが先に全部拾ってしまい
+// 本来4xxで返すべきクライアント起因のエラーが500になる
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
@@ -35,29 +45,6 @@ public class GlobalExceptionHandler {
                 null // fieldErrors
         );
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
-    }
-
-    // バリデーションの例外処理ハンドラ
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidation(
-            MethodArgumentNotValidException ex,
-            HttpServletRequest request) {
-        List<FieldValidationError> fieldErrors = ex.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(err -> new FieldValidationError(
-                        err.getField(),
-                        err.getDefaultMessage()))
-                .toList();
-
-        ErrorResponse body = new ErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
-                HttpStatus.BAD_REQUEST.getReasonPhrase(),
-                "入力値が不正です。",
-                request.getRequestURI(),
-                fieldErrors);
-
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
     // 楽観的ロックの例外処理ハンドラ
@@ -77,6 +64,8 @@ public class GlobalExceptionHandler {
     }
 
     // その他の予期しない例外は500 Internal Server Errorとして処理する
+    // 基底クラスが宣言している標準例外は、より具体的な型としてそちらが優先されるため
+    // ここには本当に想定外のものだけが来る
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(
             Exception ex,
@@ -91,6 +80,76 @@ public class GlobalExceptionHandler {
                 request.getRequestURI(),
                 null);
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    // バリデーションの例外処理ハンドラ
+    // 基底クラスもMethodArgumentNotValidExceptionを宣言しているため、独自の
+    // @ExceptionHandlerではなくprotectedフックのoverrideとして実装する
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex,
+            HttpHeaders headers,
+            HttpStatusCode status,
+            WebRequest request) {
+        List<FieldValidationError> fieldErrors = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(err -> new FieldValidationError(
+                        err.getField(),
+                        err.getDefaultMessage()))
+                .toList();
+
+        ErrorResponse body = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                "入力値が不正です。",
+                resolvePath(request),
+                fieldErrors);
+
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    // 基底クラスの各ハンドラはすべてここを通る。既定のボディはProblemDetail(RFC 7807)で
+    // このプロジェクトのErrorResponseと形が違うため、ここで統一する
+    @Override
+    protected ResponseEntity<Object> handleExceptionInternal(
+            Exception ex,
+            Object body,
+            HttpHeaders headers,
+            HttpStatusCode statusCode,
+            WebRequest request) {
+        HttpStatus status = HttpStatus.resolve(statusCode.value());
+        String error = (status != null)
+                ? status.getReasonPhrase()
+                : String.valueOf(statusCode.value());
+
+        // クライアント起因の4xxはログに残さない。5xxのみ詳細を記録する
+        if (statusCode.is5xxServerError()) {
+            log.error("予期しないエラーが発生しました: {}", resolvePath(request), ex);
+        }
+
+        // ex.getMessage()はパーサ内部の型名などが漏れるためクライアントには返さない
+        String message = statusCode.is4xxClientError()
+                ? "リクエストの形式が不正です。"
+                : "サーバーエラーが発生しました。";
+
+        ErrorResponse errorBody = new ErrorResponse(
+                statusCode.value(),
+                error,
+                message,
+                resolvePath(request),
+                null);
+
+        return new ResponseEntity<>(errorBody, headers, statusCode);
+    }
+
+    // 基底クラスのハンドラはWebRequestを受け取るため、自前のハンドラが使う
+    // HttpServletRequest#getRequestURIと同じ形式のパスを取り出す
+    private String resolvePath(WebRequest request) {
+        if (request instanceof ServletWebRequest servletWebRequest) {
+            return servletWebRequest.getRequest().getRequestURI();
+        }
+        return request.getDescription(false);
     }
 
 }
