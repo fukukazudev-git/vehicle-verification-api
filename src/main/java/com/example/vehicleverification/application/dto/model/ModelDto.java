@@ -1,4 +1,4 @@
-package com.example.vehicleverification.presentation.dto.model;
+package com.example.vehicleverification.application.dto.model;
 
 import java.time.LocalDateTime;
 

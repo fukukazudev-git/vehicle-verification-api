@@ -7,12 +7,16 @@ import org.springframework.stereotype.Service;
 
 import com.example.vehicleverification.domain.entity.User;
 import com.example.vehicleverification.domain.repository.UserRepository;
-import com.example.vehicleverification.presentation.dto.user.*;
+import com.example.vehicleverification.application.dto.user.UserCreateRequest;
+import com.example.vehicleverification.application.dto.user.UserCreateResponse;
+import com.example.vehicleverification.application.dto.user.UserDetailResponse;
+import com.example.vehicleverification.application.dto.user.UserDto;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
+// 参照系を既定とし、更新系のメソッドで個別に上書きする
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -52,6 +56,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserCreateResponse createUser(UserCreateRequest request) {
         User user = new User(
                 request.getUsername(),

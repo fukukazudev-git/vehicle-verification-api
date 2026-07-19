@@ -11,6 +11,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -35,7 +37,8 @@ public class Model {
     private String modelName;
 
     @NotNull
-    @Size(max = 4)
+    @Min(1900)
+    @Max(9999)
     private Integer modelYear;
 
     @Size(max = 20)

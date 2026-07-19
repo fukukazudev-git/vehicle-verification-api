@@ -2,7 +2,6 @@ package com.example.vehicleverification.presentation.dto.error;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import com.example.vehicleverification.domain.exception.FieldValidationError;
 import lombok.Getter;
 import lombok.Setter;
 

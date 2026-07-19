@@ -1,13 +1,18 @@
-package com.example.vehicleverification.presentation.dto.model;
+package com.example.vehicleverification.application.dto.model;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 @Getter
 @Setter
-public class ModelCreateRequest {
+public class ModelUpdateRequest {
+
+    private Long id;
 
     @NotBlank(message = "機種コードは必須です")
     @Size(max = 10, message = "機種コードは10文字以内で入力してください")
@@ -17,8 +22,9 @@ public class ModelCreateRequest {
     @Size(max = 20, message = "機種名は20文字以内で入力してください")
     private String modelName;
 
-    @NotBlank(message = "モデル年式は必須です")
-    @Size(max = 4, message = "モデル年式は4文字以内で入力してください")
+    @NotNull(message = "モデル年式は必須です")
+    @Min(value = 1900, message = "モデル年式は1900以上で入力してください")
+    @Max(value = 9999, message = "モデル年式は9999以下で入力してください")
     private Integer modelYear;
 
     @NotBlank(message = "ECUタイプは必須です")
@@ -36,16 +42,7 @@ public class ModelCreateRequest {
     @Size(max = 500, message = "備考は500文字以内で入力してください")
     private String description;
 
-    public ModelCreateRequest(String modelCode, String modelName, Integer modelYear, String ecuType,
-            String engineType, String driveType, String description) {
-
-        this.modelCode = modelCode;
-        this.modelName = modelName;
-        this.modelYear = modelYear;
-        this.ecuType = ecuType;
-        this.engineType = engineType;
-        this.driveType = driveType;
-        this.description = description;
-    }
+    @NotNull(message = "バージョンは必須です")
+    private Long version;
 
 }

@@ -1,4 +1,4 @@
-package com.example.vehicleverification.domain.exception;
+package com.example.vehicleverification.presentation.dto.error;
 
 import lombok.Getter;
 

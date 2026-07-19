@@ -2,7 +2,10 @@ package com.example.vehicleverification.application.service;
 
 import java.util.List;
 
-import com.example.vehicleverification.presentation.dto.user.*;
+import com.example.vehicleverification.application.dto.user.UserCreateRequest;
+import com.example.vehicleverification.application.dto.user.UserCreateResponse;
+import com.example.vehicleverification.application.dto.user.UserDetailResponse;
+import com.example.vehicleverification.application.dto.user.UserDto;
 
 public interface UserService {
 

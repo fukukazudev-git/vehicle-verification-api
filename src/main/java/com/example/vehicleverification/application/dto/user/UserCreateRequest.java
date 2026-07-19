@@ -1,4 +1,4 @@
-package com.example.vehicleverification.presentation.dto.user;
+package com.example.vehicleverification.application.dto.user;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -18,17 +18,10 @@ public class UserCreateRequest {
     private String password;
 
     @NotBlank(message = "表示名は必須です")
-    @Size(max = 50, message = "表示名は50文字以内で入力してください")
+    @Size(max = 100, message = "表示名は100文字以内で入力してください")
     private String displayName;
 
     @NotBlank(message = "ロールは必須です")
     private String role;
-
-    public UserCreateRequest(String username, String password, String displayName, String role) {
-        this.username = username;
-        this.password = password;
-        this.displayName = displayName;
-        this.role = role;
-    }
 
 }
