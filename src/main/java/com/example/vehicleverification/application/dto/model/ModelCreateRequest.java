@@ -17,7 +17,7 @@ public class ModelCreateRequest {
     private String modelCode;
 
     @NotBlank(message = "機種名は必須です")
-    @Size(max = 20, message = "機種名は20文字以内で入力してください")
+    @Size(max = 50, message = "機種名は50文字以内で入力してください")
     private String modelName;
 
     @NotNull(message = "モデル年式は必須です")

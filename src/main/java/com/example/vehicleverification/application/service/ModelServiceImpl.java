@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.example.vehicleverification.domain.entity.Model;
+import com.example.vehicleverification.domain.exception.DuplicateResourceException;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.domain.repository.ModelRepository;
 import com.example.vehicleverification.application.dto.model.ModelCreateRequest;
@@ -71,6 +72,10 @@ public class ModelServiceImpl implements ModelService {
     @Override
     @Transactional
     public ModelCreateResponse createModel(ModelCreateRequest request) {
+        if (modelRepository.existsByModelCode(request.getModelCode())) {
+            throw new DuplicateResourceException("modelCode", "この機種コードは既に登録されています");
+        }
+
         Model model = new Model(
                 request.getModelCode(),
                 request.getModelName(),
@@ -102,6 +107,12 @@ public class ModelServiceImpl implements ModelService {
 
         if (!model.getVersion().equals(request.getVersion())) {
             throw new OptimisticLockException();
+        }
+
+        // 自分自身は除外して判定する。除外しないとmodelCodeを変えない更新が
+        // すべて重複エラーになる
+        if (modelRepository.existsByModelCodeAndIdNot(request.getModelCode(), id)) {
+            throw new DuplicateResourceException("modelCode", "この機種コードは既に登録されています");
         }
 
         model.setModelCode(request.getModelCode());

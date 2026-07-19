@@ -33,7 +33,7 @@ public class Model {
     private String modelCode;
 
     @NotNull
-    @Size(max = 20)
+    @Size(max = 50)
     private String modelName;
 
     @NotNull
@@ -41,12 +41,15 @@ public class Model {
     @Max(9999)
     private Integer modelYear;
 
+    @NotNull
     @Size(max = 20)
     private String ecuType;
 
+    @NotNull
     @Size(max = 20)
     private String engineType;
 
+    @NotNull
     @Size(max = 10)
     private String driveType;
 

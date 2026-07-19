@@ -8,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -16,6 +17,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.example.vehicleverification.domain.exception.DuplicateResourceException;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.presentation.dto.error.ErrorResponse;
 import com.example.vehicleverification.presentation.dto.error.FieldValidationError;
@@ -45,6 +47,36 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 null // fieldErrors
         );
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    // 一意制約違反(重複登録)の例外処理ハンドラ
+    // どの項目が重複したかをfieldErrorsで返す
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateResource(
+            DuplicateResourceException ex,
+            HttpServletRequest request) {
+        ErrorResponse body = new ErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI(),
+                List.of(new FieldValidationError(ex.getField(), ex.getMessage())));
+        return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+    }
+
+    // サービス層の事前チェックとcommitの間に別トランザクションが割り込んだ場合の保険
+    // 事前チェックだけでは同時実行時にすり抜けるため両方必要
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
+            DataIntegrityViolationException ex,
+            HttpServletRequest request) {
+        ErrorResponse body = new ErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.getReasonPhrase(),
+                "既に登録されている値と重複しています。",
+                request.getRequestURI(),
+                null);
+        return new ResponseEntity<>(body, HttpStatus.CONFLICT);
     }
 
     // 楽観的ロックの例外処理ハンドラ
