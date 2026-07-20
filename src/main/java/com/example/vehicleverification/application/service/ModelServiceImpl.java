@@ -6,13 +6,23 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.example.vehicleverification.domain.entity.Model;
+import com.example.vehicleverification.domain.exception.DuplicateResourceException;
+import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.domain.repository.ModelRepository;
-import com.example.vehicleverification.dto.model.*;
+import com.example.vehicleverification.application.dto.model.ModelCreateRequest;
+import com.example.vehicleverification.application.dto.model.ModelCreateResponse;
+import com.example.vehicleverification.application.dto.model.ModelDetailResponse;
+import com.example.vehicleverification.application.dto.model.ModelDto;
+import com.example.vehicleverification.application.dto.model.ModelUpdateRequest;
+import com.example.vehicleverification.application.dto.model.ModelUpdateResponse;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
+
+import jakarta.persistence.OptimisticLockException;
 
 @Service
-@Transactional
+// 参照系を既定とし、更新系のメソッドで個別に上書きする
+@Transactional(readOnly = true)
 public class ModelServiceImpl implements ModelService {
 
     private final ModelRepository modelRepository;
@@ -45,7 +55,7 @@ public class ModelServiceImpl implements ModelService {
     @Override
     public ModelDetailResponse getModelById(Long id) {
         Model model = modelRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException());
+                .orElseThrow(() -> new ResourceNotFoundException(id));
 
         return new ModelDetailResponse(
                 model.getId(),
@@ -60,7 +70,12 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
+    @Transactional
     public ModelCreateResponse createModel(ModelCreateRequest request) {
+        if (modelRepository.existsByModelCode(request.getModelCode())) {
+            throw new DuplicateResourceException("modelCode", "この機種コードは既に登録されています");
+        }
+
         Model model = new Model(
                 request.getModelCode(),
                 request.getModelName(),
@@ -88,7 +103,17 @@ public class ModelServiceImpl implements ModelService {
     @Transactional
     public ModelUpdateResponse updateModel(Long id, ModelUpdateRequest request) {
         Model model = modelRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException());
+                .orElseThrow(() -> new ResourceNotFoundException(id));
+
+        if (!model.getVersion().equals(request.getVersion())) {
+            throw new OptimisticLockException();
+        }
+
+        // 自分自身は除外して判定する。除外しないとmodelCodeを変えない更新が
+        // すべて重複エラーになる
+        if (modelRepository.existsByModelCodeAndIdNot(request.getModelCode(), id)) {
+            throw new DuplicateResourceException("modelCode", "この機種コードは既に登録されています");
+        }
 
         model.setModelCode(request.getModelCode());
         model.setModelName(request.getModelName());
@@ -98,22 +123,27 @@ public class ModelServiceImpl implements ModelService {
         model.setDriveType(request.getDriveType());
         model.setDescription(request.getDescription());
 
+        // クライアントは返却されたversionを次の更新に使うため、
+        // flushしてincrement後のversionをレスポンスに載せる
+        Model saved = modelRepository.saveAndFlush(model);
+
         return new ModelUpdateResponse(
-                model.getId(),
-                model.getModelCode(),
-                model.getModelName(),
-                model.getModelYear(),
-                model.getEcuType(),
-                model.getEngineType(),
-                model.getDriveType(),
-                model.getDescription());
+                saved.getId(),
+                saved.getModelCode(),
+                saved.getModelName(),
+                saved.getModelYear(),
+                saved.getEcuType(),
+                saved.getEngineType(),
+                saved.getDriveType(),
+                saved.getDescription(),
+                saved.getVersion());
     }
 
     @Override
     @Transactional
     public void deleteModel(Long id) {
         Model model = modelRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException());
+                .orElseThrow(() -> new ResourceNotFoundException(id));
 
         modelRepository.delete(model);
     }

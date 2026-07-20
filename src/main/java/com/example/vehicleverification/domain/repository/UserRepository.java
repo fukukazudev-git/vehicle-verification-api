@@ -6,4 +6,6 @@ import com.example.vehicleverification.domain.entity.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
+    boolean existsByUsername(String username);
+
 }

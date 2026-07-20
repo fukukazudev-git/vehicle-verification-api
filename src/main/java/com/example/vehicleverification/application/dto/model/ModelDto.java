@@ -1,11 +1,14 @@
-package com.example.vehicleverification.dto.model;
+package com.example.vehicleverification.application.dto.model;
+
+import java.time.LocalDateTime;
 
 import lombok.Getter;
 import lombok.Setter;
 
+//一覧用
 @Getter
 @Setter
-public class ModelUpdateRequest {
+public class ModelDto {
 
     private Long id;
     private String modelCode;
@@ -15,9 +18,10 @@ public class ModelUpdateRequest {
     private String engineType;
     private String driveType;
     private String description;
+    private LocalDateTime createdAt;
 
-    public ModelUpdateRequest(Long id, String modelCode, String modelName, Integer modelYear, String ecuType,
-            String engineType, String driveType, String description) {
+    public ModelDto(Long id, String modelCode, String modelName, Integer modelYear, String ecuType,
+            String engineType, String driveType, String description, LocalDateTime createdAt) {
         this.id = id;
         this.modelCode = modelCode;
         this.modelName = modelName;
@@ -26,6 +30,7 @@ public class ModelUpdateRequest {
         this.engineType = engineType;
         this.driveType = driveType;
         this.description = description;
+        this.createdAt = createdAt;
     }
 
 }

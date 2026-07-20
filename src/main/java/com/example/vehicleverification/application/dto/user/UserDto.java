@@ -1,13 +1,14 @@
-package com.example.vehicleverification.dto.user;
+package com.example.vehicleverification.application.dto.user;
 
 import java.time.LocalDateTime;
 
 import lombok.Getter;
 import lombok.Setter;
 
+//一覧用
 @Getter
 @Setter
-public class UserDetailResponse {
+public class UserDto {
 
     private Long id;
     private String username;
@@ -15,8 +16,7 @@ public class UserDetailResponse {
     private String role;
     private LocalDateTime createdAt;
 
-    public UserDetailResponse(Long id, String username, String displayName, String role,
-            LocalDateTime createdAt) {
+    public UserDto(Long id, String username, String displayName, String role, LocalDateTime createdAt) {
         this.id = id;
         this.username = username;
         this.displayName = displayName;

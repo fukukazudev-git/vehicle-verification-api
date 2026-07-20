@@ -9,14 +9,15 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS models (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    model_code VARCHAR(50) NOT NULL UNIQUE,
-    model_name VARCHAR(100) NOT NULL,
-    model_year INT,
-    ecu_type VARCHAR(50),
-    engine_type VARCHAR(50),
-    drive_type VARCHAR(20),
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    model_code VARCHAR(10) NOT NULL UNIQUE,
+    model_name VARCHAR(50) NOT NULL,
+    model_year INT NOT NULL,
+    ecu_type VARCHAR(20) NOT NULL,
+    engine_type VARCHAR(20) NOT NULL,
+    drive_type VARCHAR(10) NOT NULL,
+    description VARCHAR(500),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    version BIGINT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS review_meetings (
