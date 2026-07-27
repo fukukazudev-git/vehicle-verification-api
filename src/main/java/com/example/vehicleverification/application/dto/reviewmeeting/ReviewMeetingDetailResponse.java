@@ -1,31 +1,34 @@
 package com.example.vehicleverification.application.dto.reviewmeeting;
 
-import lombok.Getter;
-import lombok.Setter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-// 一覧用
+import lombok.Getter;
+import lombok.Setter;
+
+//詳細用
 @Getter
 @Setter
-public class ReviewMeetingDto {
+public class ReviewMeetingDetailResponse {
 
     private Long id;
     private String title;
-    private LocalDate scheduledDate;
+    private LocalDate scheduleDate;
     private String status;
+    private String notes;
     private Long modelId;
     private String modelName;
     private Long organizerId;
     private String organizerName;
     private LocalDateTime createdAt;
 
-    public ReviewMeetingDto(Long id, String title, LocalDate scheduledDate, String status, Long modelId,
-            String modelName, Long organizerId, String organizerName, LocalDateTime createdAt) {
+    public ReviewMeetingDetailResponse(Long id, String title, LocalDate scheduleDate, String status, String notes,
+            Long modelId, String modelName, Long organizerId, String organizerName, LocalDateTime createdAt) {
         this.id = id;
         this.title = title;
-        this.scheduledDate = scheduledDate;
+        this.scheduleDate = scheduleDate;
         this.status = status;
+        this.notes = notes;
         this.modelId = modelId;
         this.modelName = modelName;
         this.organizerId = organizerId;

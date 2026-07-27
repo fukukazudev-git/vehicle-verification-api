@@ -2,13 +2,13 @@ package com.example.vehicleverification.application.dto.reviewmeeting;
 
 import lombok.Getter;
 import lombok.Setter;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-// 一覧用
 @Getter
 @Setter
-public class ReviewMeetingDto {
+public class ReviewMeetingCreateResponse {
 
     private Long id;
     private String title;
@@ -20,7 +20,7 @@ public class ReviewMeetingDto {
     private String organizerName;
     private LocalDateTime createdAt;
 
-    public ReviewMeetingDto(Long id, String title, LocalDate scheduledDate, String status, Long modelId,
+    public ReviewMeetingCreateResponse(Long id, String title, LocalDate scheduledDate, String status, Long modelId,
             String modelName, Long organizerId, String organizerName, LocalDateTime createdAt) {
         this.id = id;
         this.title = title;
