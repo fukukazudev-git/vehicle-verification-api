@@ -1,5 +1,12 @@
 package com.example.vehicleverification.application.service;
 
+import com.example.vehicleverification.domain.repository.ModelRepository;
+import com.example.vehicleverification.domain.repository.UserRepository;
+import com.example.vehicleverification.domain.entity.Model;
+import com.example.vehicleverification.domain.entity.User;
+import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingCreateRequest;
+import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingCreateResponse;
+
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,11 +28,17 @@ import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeeti
 @Transactional(readOnly = true)
 public class ReviewMeetingServiceImpl implements ReviewMeetingService {
 
-    // Implement the methods defined in the ReviewMeetingService interface here
     private final ReviewMeetingRepository reviewMeetingRepository;
+    private final ModelRepository modelRepository;
+    private final UserRepository userRepository;
 
-    public ReviewMeetingServiceImpl(ReviewMeetingRepository reviewMeetingRepository) {
+    public ReviewMeetingServiceImpl(
+            ReviewMeetingRepository reviewMeetingRepository,
+            ModelRepository modelRepository,
+            UserRepository userRepository) {
         this.reviewMeetingRepository = reviewMeetingRepository;
+        this.modelRepository = modelRepository;
+        this.userRepository = userRepository;
     }
 
     private ReviewMeetingDto convertToDto(ReviewMeeting reviewMeeting) {
@@ -42,38 +55,33 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
     }
 
     @Override
-    public List<ReviewMeetingDto> getReviewMeetingAll(ReviewMeeting reviewMeeting) {
+    public List<ReviewMeetingDto> getReviewMeetingAll(Long modelId, String status) {
 
-        if (reviewMeetingRepository.findByModelIdAndStatus(
-                reviewMeeting.getModel().getId(),
-                reviewMeeting.getStatus())
-                .isEmpty()) {
-            throw new ResourceNotFoundException(reviewMeeting.getModel().getId());
+        if (reviewMeetingRepository.findByModelIdAndStatus(modelId, status).isEmpty()) {
+            throw new ResourceNotFoundException(modelId);
         }
 
-        if (reviewMeeting.getModel().getId() == null && reviewMeeting.getStatus() == null) {
-            return reviewMeetingRepository.findAll()
+        if (modelId != null && status != null) {
+            return reviewMeetingRepository.findByModelIdAndStatus(modelId, status)
                     .stream()
                     .map(this::convertToDto)
                     .collect(Collectors.toList());
-        } else if (reviewMeeting.getModel().getId() != null && reviewMeeting.getStatus() == null) {
-            return reviewMeetingRepository.findByModelId(reviewMeeting.getModel().getId())
+        } else if (modelId != null) {
+            return reviewMeetingRepository.findByModelId(modelId)
                     .stream()
                     .map(this::convertToDto)
                     .collect(Collectors.toList());
-        } else if (reviewMeeting.getModel().getId() == null && reviewMeeting.getStatus() != null) {
-            return reviewMeetingRepository.findByStatus(reviewMeeting.getStatus())
+        } else if (status != null) {
+            return reviewMeetingRepository.findByStatus(status)
                     .stream()
                     .map(this::convertToDto)
                     .collect(Collectors.toList());
         } else {
-            return reviewMeetingRepository
-                    .findByModelIdAndStatus(reviewMeeting.getModel().getId(), reviewMeeting.getStatus())
+            return reviewMeetingRepository.findAll()
                     .stream()
                     .map(this::convertToDto)
                     .collect(Collectors.toList());
         }
-
     }
 
     @Override
@@ -97,7 +105,35 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
 
     @Override
     @Transactional
-    public ReviewMeetingDetailResponse createReviewMeeting(ReviewMeeting reviewMeeting) {
+    public ReviewMeetingCreateResponse createReviewMeeting(ReviewMeetingCreateRequest request) {
+
+        Model model = modelRepository.findById(request.getModelId())
+                .orElseThrow(() -> new ResourceNotFoundException(request.getModelId()));
+
+        User organizer = userRepository.findById(request.getOrganizerId())
+                .orElseThrow(() -> new ResourceNotFoundException(request.getOrganizerId()));
+
+        ReviewMeeting reviewMeeting = new ReviewMeeting(
+                model,
+                request.getTitle(),
+                request.getScheduledDate(),
+                request.getStatus(),
+                organizer,
+                request.getNotes());
+
+        ReviewMeeting saved = reviewMeetingRepository.save(reviewMeeting);
+
+        return new ReviewMeetingCreateResponse(
+                saved.getId(),
+                saved.getTitle(),
+                saved.getScheduledDate(),
+                saved.getStatus(),
+                saved.getModel().getId(),
+                saved.getModel().getModelName(),
+                saved.getOrganizer().getId(),
+                saved.getOrganizer().getUsername(),
+                saved.getCreatedAt());
+
     }
 
     @Override
@@ -111,7 +147,7 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
         }
 
         if (reviewMeetingRepository.existsByReviewMeetingTitleAndIdNot(request.getTitle(), id)) {
-            throw new DuplicateResourceException("title", "このレビュー会議のタイトルは既に登録されています");
+            throw new DuplicateResourceException("title", "この検証会タイトルは既に登録されています");
         }
 
         existingReviewMeeting.setTitle(request.getTitle());

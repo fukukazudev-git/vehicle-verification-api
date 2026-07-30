@@ -12,6 +12,8 @@ public interface ReviewMeetingRepository extends JpaRepository<ReviewMeeting, Lo
 
     List<ReviewMeeting> findByModelIdAndStatus(Long modelId, String status);
 
+    boolean existsByReviewMeetingTitle(String title);
+
     boolean existsByReviewMeetingTitleAndIdNot(String title, Long id);
 
 }
