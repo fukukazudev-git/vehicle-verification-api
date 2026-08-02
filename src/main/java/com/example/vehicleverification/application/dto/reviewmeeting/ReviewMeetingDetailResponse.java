@@ -13,7 +13,7 @@ public class ReviewMeetingDetailResponse {
 
     private Long id;
     private String title;
-    private LocalDate scheduleDate;
+    private LocalDate scheduledDate;
     private String status;
     private String notes;
     private Long modelId;
@@ -21,12 +21,14 @@ public class ReviewMeetingDetailResponse {
     private Long organizerId;
     private String organizerName;
     private LocalDateTime createdAt;
+    private Long version;
 
-    public ReviewMeetingDetailResponse(Long id, String title, LocalDate scheduleDate, String status, String notes,
-            Long modelId, String modelName, Long organizerId, String organizerName, LocalDateTime createdAt) {
+    public ReviewMeetingDetailResponse(Long id, String title, LocalDate scheduledDate, String status, String notes,
+            Long modelId, String modelName, Long organizerId, String organizerName, LocalDateTime createdAt,
+            Long version) {
         this.id = id;
         this.title = title;
-        this.scheduleDate = scheduleDate;
+        this.scheduledDate = scheduledDate;
         this.status = status;
         this.notes = notes;
         this.modelId = modelId;
@@ -34,6 +36,7 @@ public class ReviewMeetingDetailResponse {
         this.organizerId = organizerId;
         this.organizerName = organizerName;
         this.createdAt = createdAt;
+        this.version = version;
     }
 
 }

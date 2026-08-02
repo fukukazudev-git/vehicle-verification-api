@@ -30,7 +30,8 @@ CREATE TABLE IF NOT EXISTS review_meetings (
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (model_id) REFERENCES models(id),
-    FOREIGN KEY (organizer_id) REFERENCES users(id)
+    FOREIGN KEY (organizer_id) REFERENCES users(id),
+    version BIGINT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS test_records (

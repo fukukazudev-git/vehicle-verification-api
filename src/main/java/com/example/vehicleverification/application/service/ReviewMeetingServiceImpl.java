@@ -16,7 +16,6 @@ import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeeti
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingUpdateRequest;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingUpdateResponse;
 import com.example.vehicleverification.domain.entity.ReviewMeeting;
-import com.example.vehicleverification.domain.exception.DuplicateResourceException;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.domain.repository.ReviewMeetingRepository;
 
@@ -57,10 +56,6 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
     @Override
     public List<ReviewMeetingDto> getReviewMeetingAll(Long modelId, String status) {
 
-        if (reviewMeetingRepository.findByModelIdAndStatus(modelId, status).isEmpty()) {
-            throw new ResourceNotFoundException(modelId);
-        }
-
         if (modelId != null && status != null) {
             return reviewMeetingRepository.findByModelIdAndStatus(modelId, status)
                     .stream()
@@ -99,7 +94,8 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
                 reviewMeeting.getModel().getModelName(),
                 reviewMeeting.getOrganizer().getId(),
                 reviewMeeting.getOrganizer().getUsername(),
-                reviewMeeting.getCreatedAt());
+                reviewMeeting.getCreatedAt(),
+                reviewMeeting.getVersion());
 
     }
 
@@ -144,10 +140,6 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
 
         if (!existingReviewMeeting.getVersion().equals(request.getVersion())) {
             throw new OptimisticLockException();
-        }
-
-        if (reviewMeetingRepository.existsByReviewMeetingTitleAndIdNot(request.getTitle(), id)) {
-            throw new DuplicateResourceException("title", "この検証会タイトルは既に登録されています");
         }
 
         existingReviewMeeting.setTitle(request.getTitle());
