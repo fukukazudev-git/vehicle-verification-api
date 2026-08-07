@@ -22,10 +22,11 @@ public class ReviewMeetingDetailResponse {
     private String organizerName;
     private LocalDateTime createdAt;
     private Long version;
+    private String eventCode;
 
     public ReviewMeetingDetailResponse(Long id, String title, LocalDate scheduledDate, String status, String notes,
             Long modelId, String modelName, Long organizerId, String organizerName, LocalDateTime createdAt,
-            Long version) {
+            Long version, String eventCode) {
         this.id = id;
         this.title = title;
         this.scheduledDate = scheduledDate;
@@ -37,6 +38,7 @@ public class ReviewMeetingDetailResponse {
         this.organizerName = organizerName;
         this.createdAt = createdAt;
         this.version = version;
+        this.eventCode = eventCode;
     }
 
 }

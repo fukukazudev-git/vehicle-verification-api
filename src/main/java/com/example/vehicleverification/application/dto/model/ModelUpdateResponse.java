@@ -15,10 +15,13 @@ public class ModelUpdateResponse {
     private String engineType;
     private String driveType;
     private String description;
+    private String destination;
+    private String powertrainType;
     private Long version;
 
     public ModelUpdateResponse(Long id, String modelCode, String modelName, Integer modelYear, String ecuType,
-            String engineType, String driveType, String description, Long version) {
+            String engineType, String driveType, String description, Long version, String destination,
+            String powertrainType) {
         this.id = id;
         this.modelCode = modelCode;
         this.modelName = modelName;
@@ -28,6 +31,8 @@ public class ModelUpdateResponse {
         this.driveType = driveType;
         this.description = description;
         this.version = version;
+        this.destination = destination;
+        this.powertrainType = powertrainType;
     }
 
 }

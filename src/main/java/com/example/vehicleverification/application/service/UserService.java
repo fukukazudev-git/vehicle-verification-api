@@ -1,7 +1,8 @@
 package com.example.vehicleverification.application.service;
 
 import java.util.List;
-
+import com.example.vehicleverification.application.dto.user.UserUpdateRequest;
+import com.example.vehicleverification.application.dto.user.UserUpdateResponse;
 import com.example.vehicleverification.application.dto.user.UserCreateRequest;
 import com.example.vehicleverification.application.dto.user.UserCreateResponse;
 import com.example.vehicleverification.application.dto.user.UserDetailResponse;
@@ -14,6 +15,8 @@ public interface UserService {
     public UserDetailResponse getUserById(Long id);
 
     public UserCreateResponse createUser(UserCreateRequest request);
+
+    public UserUpdateResponse updateUser(Long id, UserUpdateRequest request);
 
     public void deleteUser(Long id);
 

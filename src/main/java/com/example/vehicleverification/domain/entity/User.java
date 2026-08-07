@@ -26,7 +26,7 @@ public class User {
     private Long id;
 
     @NotNull
-    @Size(max = 50)
+    @Size(max = 20)
     private String username;
 
     @NotNull
@@ -34,12 +34,16 @@ public class User {
     private String password;
 
     @NotNull
-    @Size(max = 100)
+    @Size(max = 50)
     private String displayName;
 
     @NotNull
     @Size(max = 20)
     private String role = "MEMBER";
+
+    @NotNull
+    @Size(max = 50)
+    private String department;
 
     @CreationTimestamp
     @Column(updatable = false)
@@ -48,11 +52,12 @@ public class User {
     protected User() {
     }
 
-    public User(String username, String password, String displayName, String role) {
+    public User(String username, String password, String displayName, String role, String department) {
         this.username = username;
         this.password = password;
         this.displayName = displayName;
         this.role = role;
+        this.department = department;
     }
 
 }

@@ -15,13 +15,16 @@ public class UserDto {
     private String displayName;
     private String role;
     private LocalDateTime createdAt;
+    private String department;
 
-    public UserDto(Long id, String username, String displayName, String role, LocalDateTime createdAt) {
+    public UserDto(Long id, String username, String displayName, String role, LocalDateTime createdAt,
+            String department) {
         this.id = id;
         this.username = username;
         this.displayName = displayName;
         this.role = role;
         this.createdAt = createdAt;
+        this.department = department;
     }
 
 }

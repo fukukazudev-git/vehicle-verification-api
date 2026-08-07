@@ -56,6 +56,14 @@ public class Model {
     @Size(max = 500)
     private String description;
 
+    @NotNull
+    @Size(max = 10)
+    private String destination;
+
+    @NotNull
+    @Size(max = 20)
+    private String powertrainType;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
@@ -67,7 +75,7 @@ public class Model {
     }
 
     public Model(String modelCode, String modelName, Integer modelYear, String ecuType, String engineType,
-            String driveType, String description) {
+            String driveType, String description, String destination, String powertrainType) {
         this.modelCode = modelCode;
         this.modelName = modelName;
         this.modelYear = modelYear;
@@ -75,6 +83,8 @@ public class Model {
         this.engineType = engineType;
         this.driveType = driveType;
         this.description = description;
+        this.destination = destination;
+        this.powertrainType = powertrainType;
     }
 
 }

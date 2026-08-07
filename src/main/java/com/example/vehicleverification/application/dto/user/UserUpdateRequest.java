@@ -7,15 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UserCreateRequest {
-
-    @NotBlank(message = "ユーザー名は必須です")
-    @Size(max = 20, message = "ユーザー名は20文字以内で入力してください")
-    private String username;
-
-    @NotBlank(message = "パスワードは必須です")
-    @Size(max = 255, message = "パスワードは255文字以内で入力してください")
-    private String password;
+public class UserUpdateRequest {
 
     @NotBlank(message = "表示名は必須です")
     @Size(max = 50, message = "表示名は50文字以内で入力してください")

@@ -12,6 +12,8 @@ import com.example.vehicleverification.application.dto.user.UserCreateRequest;
 import com.example.vehicleverification.application.dto.user.UserCreateResponse;
 import com.example.vehicleverification.application.dto.user.UserDetailResponse;
 import com.example.vehicleverification.application.dto.user.UserDto;
+import com.example.vehicleverification.application.dto.user.UserUpdateRequest;
+import com.example.vehicleverification.application.dto.user.UserUpdateResponse;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +35,8 @@ public class UserServiceImpl implements UserService {
                 user.getUsername(),
                 user.getDisplayName(),
                 user.getRole(),
-                user.getCreatedAt());
+                user.getCreatedAt(),
+                user.getDepartment());
     }
 
     @Override
@@ -54,7 +57,8 @@ public class UserServiceImpl implements UserService {
                 user.getUsername(),
                 user.getDisplayName(),
                 user.getRole(),
-                user.getCreatedAt());
+                user.getCreatedAt(),
+                user.getDepartment());
     }
 
     @Override
@@ -68,7 +72,8 @@ public class UserServiceImpl implements UserService {
                 request.getUsername(),
                 request.getPassword(),
                 request.getDisplayName(),
-                request.getRole());
+                request.getRole(),
+                request.getDepartment());
 
         User saved = userRepository.save(user);
         return new UserCreateResponse(
@@ -76,6 +81,27 @@ public class UserServiceImpl implements UserService {
                 saved.getUsername(),
                 saved.getDisplayName(),
                 saved.getRole(),
+                saved.getCreatedAt(),
+                saved.getDepartment());
+    }
+
+    @Override
+    @Transactional
+    public UserUpdateResponse updateUser(Long id, UserUpdateRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id));
+
+        user.setDisplayName(request.getDisplayName());
+        user.setRole(request.getRole());
+        user.setDepartment(request.getDepartment());
+
+        User saved = userRepository.save(user);
+        return new UserUpdateResponse(
+                saved.getId(),
+                saved.getUsername(),
+                saved.getDisplayName(),
+                saved.getRole(),
+                saved.getDepartment(),
                 saved.getCreatedAt());
     }
 

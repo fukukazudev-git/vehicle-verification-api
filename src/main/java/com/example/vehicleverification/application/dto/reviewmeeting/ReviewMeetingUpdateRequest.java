@@ -11,14 +11,14 @@ import lombok.Setter;
 @Setter
 public class ReviewMeetingUpdateRequest {
 
-    @NotNull
+    @NotBlank(message = "タイトルは必須です")
     @Size(max = 200)
     private String title;
 
     @NotNull
     private LocalDate scheduledDate;
 
-    @NotBlank
+    @NotBlank(message = "ステータスは必須です")
     private String status;
 
     @NotNull
@@ -26,17 +26,11 @@ public class ReviewMeetingUpdateRequest {
 
     private String notes;
 
+    @Size(max = 20)
+    @NotBlank(message = "イベントコードは必須です")
+    private String eventCode;
+
     @NotNull
     private Long version;
-
-    public ReviewMeetingUpdateRequest(String title, LocalDate scheduledDate, String status, Long organizerId,
-            String notes, Long version) {
-        this.title = title;
-        this.scheduledDate = scheduledDate;
-        this.status = status;
-        this.organizerId = organizerId;
-        this.notes = notes;
-        this.version = version;
-    }
 
 }

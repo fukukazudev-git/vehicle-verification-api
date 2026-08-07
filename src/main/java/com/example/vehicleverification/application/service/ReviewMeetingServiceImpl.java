@@ -50,7 +50,8 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
                 reviewMeeting.getModel().getModelName(),
                 reviewMeeting.getOrganizer().getId(),
                 reviewMeeting.getOrganizer().getUsername(),
-                reviewMeeting.getCreatedAt());
+                reviewMeeting.getCreatedAt(),
+                reviewMeeting.getEventCode());
     }
 
     @Override
@@ -95,7 +96,8 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
                 reviewMeeting.getOrganizer().getId(),
                 reviewMeeting.getOrganizer().getUsername(),
                 reviewMeeting.getCreatedAt(),
-                reviewMeeting.getVersion());
+                reviewMeeting.getVersion(),
+                reviewMeeting.getEventCode());
 
     }
 
@@ -115,7 +117,8 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
                 request.getScheduledDate(),
                 request.getStatus(),
                 organizer,
-                request.getNotes());
+                request.getNotes(),
+                request.getEventCode());
 
         ReviewMeeting saved = reviewMeetingRepository.save(reviewMeeting);
 
@@ -128,7 +131,8 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
                 saved.getModel().getModelName(),
                 saved.getOrganizer().getId(),
                 saved.getOrganizer().getUsername(),
-                saved.getCreatedAt());
+                saved.getCreatedAt(),
+                saved.getEventCode());
 
     }
 
@@ -146,6 +150,7 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
         existingReviewMeeting.setScheduledDate(request.getScheduledDate());
         existingReviewMeeting.setStatus(request.getStatus());
         existingReviewMeeting.setNotes(request.getNotes());
+        existingReviewMeeting.setEventCode(request.getEventCode());
 
         ReviewMeeting saved = reviewMeetingRepository.saveAndFlush(existingReviewMeeting);
 
@@ -159,7 +164,8 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
                 saved.getModel().getModelName(),
                 saved.getOrganizer().getId(),
                 saved.getOrganizer().getUsername(),
-                saved.getVersion());
+                saved.getVersion(),
+                saved.getEventCode());
     }
 
     @Override

@@ -17,10 +17,13 @@ public class ModelDetailResponse {
     private String engineType;
     private String driveType;
     private String description;
+    private String destination;
+    private String powertrainType;
     private LocalDateTime createdAt;
 
     public ModelDetailResponse(Long id, String modelCode, String modelName, Integer modelYear, String ecuType,
-            String engineType, String driveType, String description, LocalDateTime createdAt) {
+            String engineType, String driveType, String description, LocalDateTime createdAt, String destination,
+            String powertrainType) {
         this.id = id;
         this.modelCode = modelCode;
         this.modelName = modelName;
@@ -30,6 +33,8 @@ public class ModelDetailResponse {
         this.driveType = driveType;
         this.description = description;
         this.createdAt = createdAt;
+        this.destination = destination;
+        this.powertrainType = powertrainType;
     }
 
 }

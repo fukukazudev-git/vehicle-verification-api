@@ -1,9 +1,13 @@
+-- 注意: このinit.sqlはボリューム初回作成時のみ実行される。
+-- カラム追加後は down -v でボリュームを再作成しないとDBに反映されない。
+-- （ddl-auto: validate のため、EntityとDBのカラム定義が一致していないと起動に失敗する）
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) NOT NULL UNIQUE,
+    username VARCHAR(20) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    display_name VARCHAR(100) NOT NULL,
+    display_name VARCHAR(50) NOT NULL,
     role VARCHAR(20) NOT NULL DEFAULT 'MEMBER',
+    department VARCHAR(50) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -16,6 +20,8 @@ CREATE TABLE IF NOT EXISTS models (
     engine_type VARCHAR(20) NOT NULL,
     drive_type VARCHAR(10) NOT NULL,
     description VARCHAR(500),
+    destination VARCHAR(10) NOT NULL,
+    powertrain_type VARCHAR(20) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     version BIGINT NOT NULL DEFAULT 0
 );
@@ -28,6 +34,7 @@ CREATE TABLE IF NOT EXISTS review_meetings (
     status VARCHAR(20) NOT NULL DEFAULT '予定',
     organizer_id BIGINT NOT NULL,
     notes TEXT,
+    event_code VARCHAR(20) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (model_id) REFERENCES models(id),
     FOREIGN KEY (organizer_id) REFERENCES users(id),
