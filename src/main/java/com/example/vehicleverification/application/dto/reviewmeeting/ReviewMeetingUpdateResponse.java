@@ -19,10 +19,11 @@ public class ReviewMeetingUpdateResponse {
     private Long organizerId;
     private String organizerName;
     private Long version;
+    private String eventCode;
 
     public ReviewMeetingUpdateResponse(Long id, String title, LocalDate scheduledDate, String status, String notes,
             Long modelId,
-            String modelName, Long organizerId, String organizerName, Long version) {
+            String modelName, Long organizerId, String organizerName, Long version, String eventCode) {
         this.id = id;
         this.title = title;
         this.scheduledDate = scheduledDate;
@@ -33,6 +34,7 @@ public class ReviewMeetingUpdateResponse {
         this.organizerId = organizerId;
         this.organizerName = organizerName;
         this.version = version;
+        this.eventCode = eventCode;
     }
 
 }

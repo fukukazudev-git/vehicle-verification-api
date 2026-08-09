@@ -19,9 +19,10 @@ public class ReviewMeetingDto {
     private Long organizerId;
     private String organizerName;
     private LocalDateTime createdAt;
+    private String eventCode;
 
     public ReviewMeetingDto(Long id, String title, LocalDate scheduledDate, String status, Long modelId,
-            String modelName, Long organizerId, String organizerName, LocalDateTime createdAt) {
+            String modelName, Long organizerId, String organizerName, LocalDateTime createdAt, String eventCode) {
         this.id = id;
         this.title = title;
         this.scheduledDate = scheduledDate;
@@ -31,6 +32,7 @@ public class ReviewMeetingDto {
         this.organizerId = organizerId;
         this.organizerName = organizerName;
         this.createdAt = createdAt;
+        this.eventCode = eventCode;
     }
 
 }

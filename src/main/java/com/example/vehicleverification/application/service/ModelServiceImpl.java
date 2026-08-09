@@ -41,7 +41,9 @@ public class ModelServiceImpl implements ModelService {
                 model.getEngineType(),
                 model.getDriveType(),
                 model.getDescription(),
-                model.getCreatedAt());
+                model.getCreatedAt(),
+                model.getDestination(),
+                model.getPowertrainType());
     }
 
     @Override
@@ -66,7 +68,9 @@ public class ModelServiceImpl implements ModelService {
                 model.getEngineType(),
                 model.getDriveType(),
                 model.getDescription(),
-                model.getCreatedAt());
+                model.getCreatedAt(),
+                model.getDestination(),
+                model.getPowertrainType());
     }
 
     @Override
@@ -83,7 +87,9 @@ public class ModelServiceImpl implements ModelService {
                 request.getEcuType(),
                 request.getEngineType(),
                 request.getDriveType(),
-                request.getDescription());
+                request.getDescription(),
+                request.getDestination(),
+                request.getPowertrainType());
 
         Model saved = modelRepository.save(model);
 
@@ -96,7 +102,9 @@ public class ModelServiceImpl implements ModelService {
                 saved.getEngineType(),
                 saved.getDriveType(),
                 saved.getDescription(),
-                saved.getCreatedAt());
+                saved.getCreatedAt(),
+                saved.getDestination(),
+                saved.getPowertrainType());
     }
 
     @Override
@@ -122,6 +130,8 @@ public class ModelServiceImpl implements ModelService {
         model.setEngineType(request.getEngineType());
         model.setDriveType(request.getDriveType());
         model.setDescription(request.getDescription());
+        model.setDestination(request.getDestination());
+        model.setPowertrainType(request.getPowertrainType());
 
         // クライアントは返却されたversionを次の更新に使うため、
         // flushしてincrement後のversionをレスポンスに載せる
@@ -136,7 +146,9 @@ public class ModelServiceImpl implements ModelService {
                 saved.getEngineType(),
                 saved.getDriveType(),
                 saved.getDescription(),
-                saved.getVersion());
+                saved.getVersion(),
+                saved.getDestination(),
+                saved.getPowertrainType());
     }
 
     @Override

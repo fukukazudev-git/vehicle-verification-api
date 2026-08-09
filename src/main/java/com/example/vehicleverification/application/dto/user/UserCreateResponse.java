@@ -14,13 +14,16 @@ public class UserCreateResponse {
     private String displayName;
     private String role;
     private LocalDateTime createdAt;
+    private String department;
 
-    public UserCreateResponse(Long id, String username, String displayName, String role, LocalDateTime createdAt) {
+    public UserCreateResponse(Long id, String username, String displayName, String role, LocalDateTime createdAt,
+            String department) {
         this.id = id;
         this.username = username;
         this.displayName = displayName;
         this.role = role;
         this.createdAt = createdAt;
+        this.department = department;
     }
 
 }

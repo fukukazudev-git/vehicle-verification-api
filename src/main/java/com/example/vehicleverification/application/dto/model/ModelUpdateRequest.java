@@ -40,6 +40,14 @@ public class ModelUpdateRequest {
     @Size(max = 500, message = "備考は500文字以内で入力してください")
     private String description;
 
+    @NotBlank(message = "仕向地は必須です")
+    @Size(max = 10, message = "仕向地は10文字以内で入力してください")
+    private String destination;
+
+    @NotBlank(message = "パワートレインタイプは必須です")
+    @Size(max = 20, message = "パワートレインタイプは20文字以内で入力してください")
+    private String powertrainType;
+
     @NotNull(message = "バージョンは必須です")
     private Long version;
 

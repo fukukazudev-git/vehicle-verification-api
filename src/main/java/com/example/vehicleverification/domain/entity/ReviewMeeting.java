@@ -60,6 +60,10 @@ public class ReviewMeeting {
 
     private String notes;
 
+    @NotNull
+    @Size(max = 20)
+    private String eventCode;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
@@ -71,13 +75,14 @@ public class ReviewMeeting {
     }
 
     public ReviewMeeting(Model model, String title, LocalDate scheduledDate,
-            String status, User organizer, String notes) {
+            String status, User organizer, String notes, String eventCode) {
         this.model = model;
         this.title = title;
         this.scheduledDate = scheduledDate;
         this.status = status;
         this.organizer = organizer;
         this.notes = notes;
+        this.eventCode = eventCode;
     }
 
 }

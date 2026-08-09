@@ -1,7 +1,6 @@
 package com.example.vehicleverification.application.service;
 
 import java.util.List;
-import com.example.vehicleverification.domain.entity.ReviewMeeting;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingCreateRequest;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingCreateResponse;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingDto;
@@ -11,7 +10,7 @@ import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeeti
 
 public interface ReviewMeetingService {
 
-    List<ReviewMeetingDto> getReviewMeetingAll(ReviewMeeting reviewMeeting);
+    List<ReviewMeetingDto> getReviewMeetingAll(Long modelId, String status);
 
     ReviewMeetingDetailResponse getReviewMeetingById(Long id);
 
