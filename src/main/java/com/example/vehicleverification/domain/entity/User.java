@@ -39,7 +39,7 @@ public class User {
 
     @NotNull
     @Size(max = 20)
-    private String role = "MEMBER";
+    private String role;
 
     @NotNull
     @Size(max = 50)

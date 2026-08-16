@@ -39,3 +39,6 @@ out/
 ### Environment ###
 .env
 
+### Local scratch (perf logs 等、アプリ実行には不要) ###
+/docs/perf/
+
