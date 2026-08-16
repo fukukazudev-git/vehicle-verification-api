@@ -48,7 +48,7 @@ public class ReviewMeeting {
 
     @NotNull
     @Size(max = 20)
-    private String status = "予定";
+    private String status;
 
     // DB側の設定で organizer_idカラムはusersテーブルを参照する外部キー制約が設定されているため、
     // usersテーブルのidカラムを参照することが可能。

@@ -44,13 +44,14 @@ CREATE TABLE IF NOT EXISTS review_meetings (
 CREATE TABLE IF NOT EXISTS test_records (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     review_meeting_id BIGINT NOT NULL,
-    test_name VARCHAR(200) NOT NULL,
+    test_name VARCHAR(100) NOT NULL,
     result VARCHAR(20) NOT NULL DEFAULT '保留',
     notes TEXT,
     recorded_by BIGINT NOT NULL,
     recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (review_meeting_id) REFERENCES review_meetings(id),
-    FOREIGN KEY (recorded_by) REFERENCES users(id)
+    FOREIGN KEY (recorded_by) REFERENCES users(id),
+    version BIGINT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS attachments (

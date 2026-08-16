@@ -43,7 +43,8 @@ public class ReviewMeetingController {
     }
 
     @PostMapping
-    public ReviewMeetingCreateResponse createReviewMeeting(@Valid @RequestBody ReviewMeetingCreateRequest request) {
+    public ReviewMeetingCreateResponse createReviewMeeting(
+            @Valid @RequestBody ReviewMeetingCreateRequest request) {
         return reviewMeetingService.createReviewMeeting(request);
     }
 
