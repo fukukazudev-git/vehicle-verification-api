@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -39,13 +40,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ErrorResponse> handleResourceNotFound(
             ResourceNotFoundException ex,
             HttpServletRequest request) {
+
         ErrorResponse body = new ErrorResponse(
                 HttpStatus.NOT_FOUND.value(), // status 404
                 HttpStatus.NOT_FOUND.getReasonPhrase(), // error "Not Found"
                 ex.getMessage(), // message "Resource not found"
                 request.getRequestURI(), // path "/users/{id}"
-                null // fieldErrors
-        );
+                null); // fieldErrors null
+
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
@@ -55,12 +57,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ErrorResponse> handleDuplicateResource(
             DuplicateResourceException ex,
             HttpServletRequest request) {
+
         ErrorResponse body = new ErrorResponse(
                 HttpStatus.CONFLICT.value(),
                 HttpStatus.CONFLICT.getReasonPhrase(),
                 ex.getMessage(),
                 request.getRequestURI(),
                 List.of(new FieldValidationError(ex.getField(), ex.getMessage())));
+
         return new ResponseEntity<>(body, HttpStatus.CONFLICT);
     }
 
@@ -70,12 +74,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
             DataIntegrityViolationException ex,
             HttpServletRequest request) {
+
         ErrorResponse body = new ErrorResponse(
                 HttpStatus.CONFLICT.value(),
                 HttpStatus.CONFLICT.getReasonPhrase(),
                 "既に登録されている値と重複しています。",
                 request.getRequestURI(),
                 null);
+
         return new ResponseEntity<>(body, HttpStatus.CONFLICT);
     }
 
@@ -86,13 +92,31 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ErrorResponse> handleOptimisticLock(
             Exception ex,
             HttpServletRequest request) {
+
         ErrorResponse body = new ErrorResponse(
                 HttpStatus.CONFLICT.value(),
                 HttpStatus.CONFLICT.getReasonPhrase(),
                 "ほかのユーザーが先に更新しました。",
                 request.getRequestURI(),
                 null);
+
         return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+    }
+
+    // 401 Unauthorizedの例外処理ハンドラ
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthenticationException(
+            AuthenticationException ex,
+            HttpServletRequest request) {
+
+        ErrorResponse body = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                HttpStatus.UNAUTHORIZED.getReasonPhrase(),
+                "ユーザー名またはパスワードが正しくありません。",
+                request.getRequestURI(),
+                null);
+
+        return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
     }
 
     // その他の予期しない例外は500 Internal Server Errorとして処理する
@@ -102,6 +126,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ErrorResponse> handleException(
             Exception ex,
             HttpServletRequest request) {
+
         // 例外の詳細はログにのみ出力し、クライアントには固定文言を返す
         log.error("予期しないエラーが発生しました: {}", request.getRequestURI(), ex);
 
@@ -111,6 +136,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 "サーバーエラーが発生しました。",
                 request.getRequestURI(),
                 null);
+
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -123,6 +149,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             HttpHeaders headers,
             HttpStatusCode status,
             WebRequest request) {
+
         List<FieldValidationError> fieldErrors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
@@ -150,6 +177,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             HttpHeaders headers,
             HttpStatusCode statusCode,
             WebRequest request) {
+
         HttpStatus status = HttpStatus.resolve(statusCode.value());
         String error = (status != null)
                 ? status.getReasonPhrase()
@@ -178,9 +206,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     // 基底クラスのハンドラはWebRequestを受け取るため、自前のハンドラが使う
     // HttpServletRequest#getRequestURIと同じ形式のパスを取り出す
     private String resolvePath(WebRequest request) {
+
         if (request instanceof ServletWebRequest servletWebRequest) {
             return servletWebRequest.getRequest().getRequestURI();
         }
+
         return request.getDescription(false);
     }
 
