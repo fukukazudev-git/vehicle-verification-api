@@ -9,6 +9,7 @@ import com.example.vehicleverification.domain.entity.User;
 import com.example.vehicleverification.domain.exception.DuplicateResourceException;
 import com.example.vehicleverification.domain.repository.UserRepository;
 import com.example.vehicleverification.application.dto.user.UserCreateRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import com.example.vehicleverification.application.dto.user.UserCreateResponse;
 import com.example.vehicleverification.application.dto.user.UserDetailResponse;
 import com.example.vehicleverification.application.dto.user.UserDto;
@@ -25,8 +26,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    // パスワードのハッシュ化に使用するPasswordEncoderをDIする
+    private final PasswordEncoder passwordEncoder;
+
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     private UserDto convertToDto(User user) {
@@ -70,7 +75,7 @@ public class UserServiceImpl implements UserService {
 
         User user = new User(
                 request.getUsername(),
-                request.getPassword(),
+                passwordEncoder.encode(request.getPassword()), // パスワードはハッシュ化して保存する
                 request.getDisplayName(),
                 request.getRole(),
                 request.getDepartment());
