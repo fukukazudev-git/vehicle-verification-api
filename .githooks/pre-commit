@@ -1,0 +1,25 @@
+#!/bin/sh
+# コミット前に、ステージされた Java ファイルを Spotless(palantir) で整形する。
+# 整形後の内容を再ステージするので、コミットは常に整形済みになる。
+# 新しくクローンしたら、一度だけ有効化する:
+#   git config core.hooksPath .githooks
+
+staged_java=$(git diff --cached --name-only --diff-filter=ACM -- '*.java')
+if [ -z "$staged_java" ]; then
+    exit 0
+fi
+
+echo "[pre-commit] running spotlessApply..."
+./gradlew spotlessApply -q
+status=$?
+if [ "$status" -ne 0 ]; then
+    echo "[pre-commit] spotlessApply failed. コミットを中止します。"
+    exit "$status"
+fi
+
+# 整形結果を、元々ステージされていた Java ファイルだけ再ステージする
+echo "$staged_java" | while IFS= read -r f; do
+    [ -n "$f" ] && git add -- "$f"
+done
+
+exit 0
