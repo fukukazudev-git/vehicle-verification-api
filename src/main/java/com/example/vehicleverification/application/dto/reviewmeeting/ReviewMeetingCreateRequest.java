@@ -32,21 +32,4 @@ public class ReviewMeetingCreateRequest {
     @NotBlank(message = "イベントコードは必須です")
     @Size(max = 20)
     private String eventCode;
-
-    public ReviewMeetingCreateRequest(
-            Long modelId,
-            String title,
-            LocalDate scheduledDate,
-            String status,
-            Long organizerId,
-            String notes,
-            String eventCode) {
-        this.modelId = modelId;
-        this.title = title;
-        this.scheduledDate = scheduledDate;
-        this.status = status;
-        this.organizerId = organizerId;
-        this.notes = notes;
-        this.eventCode = eventCode;
-    }
 }

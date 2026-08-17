@@ -2,12 +2,14 @@ package com.example.vehicleverification.application.dto.reviewmeeting;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 // 詳細用
 @Getter
 @Setter
+@AllArgsConstructor
 public class ReviewMeetingDetailResponse {
 
     private Long id;
@@ -22,31 +24,4 @@ public class ReviewMeetingDetailResponse {
     private LocalDateTime createdAt;
     private Long version;
     private String eventCode;
-
-    public ReviewMeetingDetailResponse(
-            Long id,
-            String title,
-            LocalDate scheduledDate,
-            String status,
-            String notes,
-            Long modelId,
-            String modelName,
-            Long organizerId,
-            String organizerName,
-            LocalDateTime createdAt,
-            Long version,
-            String eventCode) {
-        this.id = id;
-        this.title = title;
-        this.scheduledDate = scheduledDate;
-        this.status = status;
-        this.notes = notes;
-        this.modelId = modelId;
-        this.modelName = modelName;
-        this.organizerId = organizerId;
-        this.organizerName = organizerName;
-        this.createdAt = createdAt;
-        this.version = version;
-        this.eventCode = eventCode;
-    }
 }
