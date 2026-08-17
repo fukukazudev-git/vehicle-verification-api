@@ -1,10 +1,12 @@
 package com.example.vehicleverification.application.dto.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@AllArgsConstructor
 public class ModelUpdateResponse {
 
     private Long id;
@@ -15,32 +17,7 @@ public class ModelUpdateResponse {
     private String engineType;
     private String driveType;
     private String description;
+    private Long version;
     private String destination;
     private String powertrainType;
-    private Long version;
-
-    public ModelUpdateResponse(
-            Long id,
-            String modelCode,
-            String modelName,
-            Integer modelYear,
-            String ecuType,
-            String engineType,
-            String driveType,
-            String description,
-            Long version,
-            String destination,
-            String powertrainType) {
-        this.id = id;
-        this.modelCode = modelCode;
-        this.modelName = modelName;
-        this.modelYear = modelYear;
-        this.ecuType = ecuType;
-        this.engineType = engineType;
-        this.driveType = driveType;
-        this.description = description;
-        this.version = version;
-        this.destination = destination;
-        this.powertrainType = powertrainType;
-    }
 }
