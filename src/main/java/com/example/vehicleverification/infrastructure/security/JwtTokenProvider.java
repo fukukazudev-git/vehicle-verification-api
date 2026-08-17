@@ -1,15 +1,13 @@
 package com.example.vehicleverification.infrastructure.security;
 
-import org.springframework.stereotype.Component;
-
 import com.example.vehicleverification.infrastructure.config.JwtProperties;
-
-import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
+import org.springframework.stereotype.Component;
 
 // トークン生成・検証・ユーザ名抽出
 @Component
@@ -25,7 +23,6 @@ public class JwtTokenProvider {
         this.jwtProperties = jwtProperties;
         // SecretKeyを生成する際に、文字列をバイト配列に変換する
         this.key = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8));
-
     }
 
     // HMAC-SHA256で署名したJWTを生成
@@ -40,7 +37,6 @@ public class JwtTokenProvider {
                 .expiration(new Date(now + jwtProperties.getExpiration())) // exp 有効期限
                 .signWith(key, Jwts.SIG.HS256) // alg を明示
                 .compact(); // 文字列化して返す
-
     }
 
     // 署名検証・有効期限検証
@@ -55,17 +51,18 @@ public class JwtTokenProvider {
 
             // 例外はログに残さずfalseを返す
             return false;
-
         }
-
     }
 
     // usernameをJWTから抽出
     public String getUsernameFromToken(String token) {
 
         // チェーンでsubを取得する
-        return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload().getSubject();
-
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
     }
-
 }

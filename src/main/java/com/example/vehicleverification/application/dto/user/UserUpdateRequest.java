@@ -19,5 +19,4 @@ public class UserUpdateRequest {
     @NotBlank(message = "部署は必須です")
     @Size(max = 50, message = "部署は50文字以内で入力してください")
     private String department;
-
 }

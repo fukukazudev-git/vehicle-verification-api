@@ -1,22 +1,20 @@
 package com.example.vehicleverification.domain.entity;
 
-import java.time.LocalDateTime;
-
-import org.hibernate.annotations.CreationTimestamp;
-import jakarta.persistence.Version;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "models")
@@ -71,11 +69,18 @@ public class Model {
     @Version
     private Long version;
 
-    protected Model() {
-    }
+    protected Model() {}
 
-    public Model(String modelCode, String modelName, Integer modelYear, String ecuType, String engineType,
-            String driveType, String description, String destination, String powertrainType) {
+    public Model(
+            String modelCode,
+            String modelName,
+            Integer modelYear,
+            String ecuType,
+            String engineType,
+            String driveType,
+            String description,
+            String destination,
+            String powertrainType) {
         this.modelCode = modelCode;
         this.modelName = modelName;
         this.modelYear = modelYear;
@@ -86,5 +91,4 @@ public class Model {
         this.destination = destination;
         this.powertrainType = powertrainType;
     }
-
 }

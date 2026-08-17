@@ -1,27 +1,23 @@
 package com.example.vehicleverification.application.service;
 
-import com.example.vehicleverification.domain.repository.ModelRepository;
-import com.example.vehicleverification.domain.repository.UserRepository;
-import com.example.vehicleverification.domain.entity.Model;
-import com.example.vehicleverification.domain.entity.User;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingCreateRequest;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingCreateResponse;
-
-import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.springframework.stereotype.Service;
-
+import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingDetailResponse;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingDto;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingUpdateRequest;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingUpdateResponse;
+import com.example.vehicleverification.domain.entity.Model;
 import com.example.vehicleverification.domain.entity.ReviewMeeting;
+import com.example.vehicleverification.domain.entity.User;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
+import com.example.vehicleverification.domain.repository.ModelRepository;
 import com.example.vehicleverification.domain.repository.ReviewMeetingRepository;
-
+import com.example.vehicleverification.domain.repository.UserRepository;
 import jakarta.persistence.OptimisticLockException;
-
-import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingDetailResponse;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional(readOnly = true)
@@ -58,23 +54,19 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
     public List<ReviewMeetingDto> getReviewMeetingAll(Long modelId, String status) {
 
         if (modelId != null && status != null) {
-            return reviewMeetingRepository.findByModelIdAndStatus(modelId, status)
-                    .stream()
+            return reviewMeetingRepository.findByModelIdAndStatus(modelId, status).stream()
                     .map(this::convertToDto)
                     .collect(Collectors.toList());
         } else if (modelId != null) {
-            return reviewMeetingRepository.findByModelId(modelId)
-                    .stream()
+            return reviewMeetingRepository.findByModelId(modelId).stream()
                     .map(this::convertToDto)
                     .collect(Collectors.toList());
         } else if (status != null) {
-            return reviewMeetingRepository.findByStatus(status)
-                    .stream()
+            return reviewMeetingRepository.findByStatus(status).stream()
                     .map(this::convertToDto)
                     .collect(Collectors.toList());
         } else {
-            return reviewMeetingRepository.findAll()
-                    .stream()
+            return reviewMeetingRepository.findAll().stream()
                     .map(this::convertToDto)
                     .collect(Collectors.toList());
         }
@@ -82,8 +74,8 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
 
     @Override
     public ReviewMeetingDetailResponse getReviewMeetingById(Long id) {
-        ReviewMeeting reviewMeeting = reviewMeetingRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id));
+        ReviewMeeting reviewMeeting =
+                reviewMeetingRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
 
         return new ReviewMeetingDetailResponse(
                 reviewMeeting.getId(),
@@ -98,17 +90,18 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
                 reviewMeeting.getCreatedAt(),
                 reviewMeeting.getVersion(),
                 reviewMeeting.getEventCode());
-
     }
 
     @Override
     @Transactional
     public ReviewMeetingCreateResponse createReviewMeeting(ReviewMeetingCreateRequest request) {
 
-        Model model = modelRepository.findById(request.getModelId())
+        Model model = modelRepository
+                .findById(request.getModelId())
                 .orElseThrow(() -> new ResourceNotFoundException(request.getModelId()));
 
-        User organizer = userRepository.findById(request.getOrganizerId())
+        User organizer = userRepository
+                .findById(request.getOrganizerId())
                 .orElseThrow(() -> new ResourceNotFoundException(request.getOrganizerId()));
 
         ReviewMeeting reviewMeeting = new ReviewMeeting(
@@ -133,14 +126,13 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
                 saved.getOrganizer().getUsername(),
                 saved.getCreatedAt(),
                 saved.getEventCode());
-
     }
 
     @Override
     @Transactional
     public ReviewMeetingUpdateResponse updateReviewMeeting(Long id, ReviewMeetingUpdateRequest request) {
-        ReviewMeeting existingReviewMeeting = reviewMeetingRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id));
+        ReviewMeeting existingReviewMeeting =
+                reviewMeetingRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
 
         if (!existingReviewMeeting.getVersion().equals(request.getVersion())) {
             throw new OptimisticLockException();
@@ -171,11 +163,9 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
     @Override
     @Transactional
     public void deleteReviewMeeting(Long id) {
-        ReviewMeeting reviewMeeting = reviewMeetingRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id));
+        ReviewMeeting reviewMeeting =
+                reviewMeetingRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
 
         reviewMeetingRepository.delete(reviewMeeting);
-
     }
-
 }

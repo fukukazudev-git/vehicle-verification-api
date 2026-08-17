@@ -1,10 +1,9 @@
 package com.example.vehicleverification.application.dto.reviewmeeting;
 
-import java.time.LocalDate;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -34,8 +33,14 @@ public class ReviewMeetingCreateRequest {
     @Size(max = 20)
     private String eventCode;
 
-    public ReviewMeetingCreateRequest(Long modelId, String title, LocalDate scheduledDate, String status,
-            Long organizerId, String notes, String eventCode) {
+    public ReviewMeetingCreateRequest(
+            Long modelId,
+            String title,
+            LocalDate scheduledDate,
+            String status,
+            Long organizerId,
+            String notes,
+            String eventCode) {
         this.modelId = modelId;
         this.title = title;
         this.scheduledDate = scheduledDate;
@@ -44,5 +49,4 @@ public class ReviewMeetingCreateRequest {
         this.notes = notes;
         this.eventCode = eventCode;
     }
-
 }

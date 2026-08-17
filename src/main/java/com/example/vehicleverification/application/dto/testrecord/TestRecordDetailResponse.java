@@ -1,8 +1,8 @@
 package com.example.vehicleverification.application.dto.testrecord;
 
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -19,8 +19,16 @@ public class TestRecordDetailResponse {
     private LocalDateTime recordedAt;
     private Long version;
 
-    public TestRecordDetailResponse(Long id, String testName, String result, String notes, Long reviewMeetingId,
-            String reviewMeetingTitle, Long recordedById, String recordedByName, LocalDateTime recordedAt,
+    public TestRecordDetailResponse(
+            Long id,
+            String testName,
+            String result,
+            String notes,
+            Long reviewMeetingId,
+            String reviewMeetingTitle,
+            Long recordedById,
+            String recordedByName,
+            LocalDateTime recordedAt,
             Long version) {
         this.id = id;
         this.testName = testName;
@@ -33,5 +41,4 @@ public class TestRecordDetailResponse {
         this.recordedAt = recordedAt;
         this.version = version;
     }
-
 }

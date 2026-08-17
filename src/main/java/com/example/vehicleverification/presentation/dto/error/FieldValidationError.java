@@ -12,5 +12,4 @@ public class FieldValidationError {
         this.field = field;
         this.message = message;
     }
-
 }

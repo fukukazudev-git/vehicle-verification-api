@@ -15,8 +15,8 @@ public class ErrorResponse {
     private String path;
     private List<FieldValidationError> fieldErrors;
 
-    public ErrorResponse(int status, String error, String message, String path,
-            List<FieldValidationError> fieldErrors) {
+    public ErrorResponse(
+            int status, String error, String message, String path, List<FieldValidationError> fieldErrors) {
         this.timestamp = LocalDateTime.now();
         this.status = status;
         this.error = error;

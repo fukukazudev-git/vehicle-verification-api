@@ -1,14 +1,19 @@
 package com.example.vehicleverification.presentation.advice;
 
+import com.example.vehicleverification.domain.exception.DuplicateResourceException;
+import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
+import com.example.vehicleverification.presentation.dto.error.ErrorResponse;
+import com.example.vehicleverification.presentation.dto.error.FieldValidationError;
+import jakarta.persistence.OptimisticLockException;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -17,14 +22,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-
-import com.example.vehicleverification.domain.exception.DuplicateResourceException;
-import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
-import com.example.vehicleverification.presentation.dto.error.ErrorResponse;
-import com.example.vehicleverification.presentation.dto.error.FieldValidationError;
-
-import jakarta.persistence.OptimisticLockException;
-import jakarta.servlet.http.HttpServletRequest;
 
 // ResponseEntityExceptionHandlerを継承することで、Spring MVCが投げる標準例外
 // (型変換失敗・JSONパース失敗・未対応メソッドなど)が基底クラスの個別ハンドラに
@@ -38,8 +35,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     // ResourceNotFoundExceptionの例外処理ハンドラ
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFound(
-            ResourceNotFoundException ex,
-            HttpServletRequest request) {
+            ResourceNotFoundException ex, HttpServletRequest request) {
 
         ErrorResponse body = new ErrorResponse(
                 HttpStatus.NOT_FOUND.value(), // status 404
@@ -55,8 +51,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     // どの項目が重複したかをfieldErrorsで返す
     @ExceptionHandler(DuplicateResourceException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateResource(
-            DuplicateResourceException ex,
-            HttpServletRequest request) {
+            DuplicateResourceException ex, HttpServletRequest request) {
 
         ErrorResponse body = new ErrorResponse(
                 HttpStatus.CONFLICT.value(),
@@ -72,8 +67,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     // 事前チェックだけでは同時実行時にすり抜けるため両方必要
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
-            DataIntegrityViolationException ex,
-            HttpServletRequest request) {
+            DataIntegrityViolationException ex, HttpServletRequest request) {
 
         ErrorResponse body = new ErrorResponse(
                 HttpStatus.CONFLICT.value(),
@@ -88,10 +82,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     // 楽観的ロックの例外処理ハンドラ
     // @Versionによる実際の競合はSpringがObjectOptimisticLockingFailureExceptionにラップするため、
     // サービス層が明示的に投げるOptimisticLockExceptionと合わせて両方を受ける
-    @ExceptionHandler({ OptimisticLockException.class, ObjectOptimisticLockingFailureException.class })
-    public ResponseEntity<ErrorResponse> handleOptimisticLock(
-            Exception ex,
-            HttpServletRequest request) {
+    @ExceptionHandler({OptimisticLockException.class, ObjectOptimisticLockingFailureException.class})
+    public ResponseEntity<ErrorResponse> handleOptimisticLock(Exception ex, HttpServletRequest request) {
 
         ErrorResponse body = new ErrorResponse(
                 HttpStatus.CONFLICT.value(),
@@ -106,8 +98,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     // 401 Unauthorizedの例外処理ハンドラ
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthenticationException(
-            AuthenticationException ex,
-            HttpServletRequest request) {
+            AuthenticationException ex, HttpServletRequest request) {
 
         ErrorResponse body = new ErrorResponse(
                 HttpStatus.UNAUTHORIZED.value(),
@@ -123,9 +114,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     // 基底クラスが宣言している標準例外は、より具体的な型としてそちらが優先されるため
     // ここには本当に想定外のものだけが来る
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(
-            Exception ex,
-            HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleException(Exception ex, HttpServletRequest request) {
 
         // 例外の詳細はログにのみ出力し、クライアントには固定文言を返す
         log.error("予期しないエラーが発生しました: {}", request.getRequestURI(), ex);
@@ -145,17 +134,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     // @ExceptionHandlerではなくprotectedフックのoverrideとして実装する
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex,
-            HttpHeaders headers,
-            HttpStatusCode status,
-            WebRequest request) {
+            MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
-        List<FieldValidationError> fieldErrors = ex.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(err -> new FieldValidationError(
-                        err.getField(),
-                        err.getDefaultMessage()))
+        List<FieldValidationError> fieldErrors = ex.getBindingResult().getFieldErrors().stream()
+                .map(err -> new FieldValidationError(err.getField(), err.getDefaultMessage()))
                 .toList();
 
         ErrorResponse body = new ErrorResponse(
@@ -172,16 +154,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     // このプロジェクトのErrorResponseと形が違うため、ここで統一する
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(
-            Exception ex,
-            Object body,
-            HttpHeaders headers,
-            HttpStatusCode statusCode,
-            WebRequest request) {
+            Exception ex, Object body, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
 
         HttpStatus status = HttpStatus.resolve(statusCode.value());
-        String error = (status != null)
-                ? status.getReasonPhrase()
-                : String.valueOf(statusCode.value());
+        String error = (status != null) ? status.getReasonPhrase() : String.valueOf(statusCode.value());
 
         // クライアント起因の4xxはログに残さない。5xxのみ詳細を記録する
         if (statusCode.is5xxServerError()) {
@@ -189,16 +165,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         }
 
         // ex.getMessage()はパーサ内部の型名などが漏れるためクライアントには返さない
-        String message = statusCode.is4xxClientError()
-                ? "リクエストの形式が不正です。"
-                : "サーバーエラーが発生しました。";
+        String message = statusCode.is4xxClientError() ? "リクエストの形式が不正です。" : "サーバーエラーが発生しました。";
 
-        ErrorResponse errorBody = new ErrorResponse(
-                statusCode.value(),
-                error,
-                message,
-                resolvePath(request),
-                null);
+        ErrorResponse errorBody = new ErrorResponse(statusCode.value(), error, message, resolvePath(request), null);
 
         return new ResponseEntity<>(errorBody, headers, statusCode);
     }
@@ -213,5 +182,4 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         return request.getDescription(false);
     }
-
 }
