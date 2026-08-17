@@ -1,14 +1,13 @@
 package com.example.vehicleverification.infrastructure.config;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
+import com.example.vehicleverification.domain.entity.User;
+import com.example.vehicleverification.domain.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.example.vehicleverification.domain.repository.UserRepository;
-
-import com.example.vehicleverification.domain.entity.User;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
 
 @Component
 public class InitialAdminRunner implements CommandLineRunner {
@@ -36,7 +35,6 @@ public class InitialAdminRunner implements CommandLineRunner {
 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-
     }
 
     @Override
@@ -59,9 +57,6 @@ public class InitialAdminRunner implements CommandLineRunner {
         } else {
 
             return;
-
         }
-
     }
-
 }

@@ -1,5 +1,6 @@
 package com.example.vehicleverification.infrastructure.config;
 
+import com.example.vehicleverification.infrastructure.security.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -7,13 +8,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.config.http.SessionCreationPolicy;
-
-import com.example.vehicleverification.infrastructure.security.JwtAuthenticationFilter;
 
 // 認可設定、認証機構配線
 @Configuration
@@ -36,8 +35,7 @@ public class SecurityConfig {
     // AuthControllerがログイン認証に使用する
     // DaoAuthenticationProviderが使用するAuthenticationManagerを取り出して@Beanとして再公開
     @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
@@ -47,18 +45,19 @@ public class SecurityConfig {
 
         http
                 // httpBasic認証を無効化するとデフォルトでは403にフォールバックするため401を返すEntryPointを明示
-                .exceptionHandling(e -> e.authenticationEntryPoint(
-                        (request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED))) // 認証失敗時は401を返す
+                .exceptionHandling(e -> e.authenticationEntryPoint((request, response, authException) ->
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED))) // 認証失敗時は401を返す
                 .csrf(csrf -> csrf.disable()) // 認証情報はAuthorizationヘッダーで明示送信&ステートレスであるためCSRF対策無効化
-                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // JWT認証のため認証状態はサーバに保持せず、JWTで自己申告させる
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
+                .sessionManagement(s ->
+                        s.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // JWT認証のため認証状態はサーバに保持せず、JWTで自己申告させる
+                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**")
+                        .permitAll()
                         .anyRequest()
                         .authenticated()) // /api/auth/**以外は認証必須
-                .addFilterBefore(jwtAuthenticationFilter,
+                .addFilterBefore(
+                        jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class); // 標準の認証フィルタの前にJWT認証フィルタを挿入する
 
         return http.build();
-
     }
 }

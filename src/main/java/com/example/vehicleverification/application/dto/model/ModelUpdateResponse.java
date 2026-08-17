@@ -19,8 +19,17 @@ public class ModelUpdateResponse {
     private String powertrainType;
     private Long version;
 
-    public ModelUpdateResponse(Long id, String modelCode, String modelName, Integer modelYear, String ecuType,
-            String engineType, String driveType, String description, Long version, String destination,
+    public ModelUpdateResponse(
+            Long id,
+            String modelCode,
+            String modelName,
+            Integer modelYear,
+            String ecuType,
+            String engineType,
+            String driveType,
+            String description,
+            Long version,
+            String destination,
             String powertrainType) {
         this.id = id;
         this.modelCode = modelCode;
@@ -34,5 +43,4 @@ public class ModelUpdateResponse {
         this.destination = destination;
         this.powertrainType = powertrainType;
     }
-
 }

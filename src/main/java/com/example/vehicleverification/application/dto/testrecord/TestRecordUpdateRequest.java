@@ -1,10 +1,10 @@
 package com.example.vehicleverification.application.dto.testrecord;
 
-import lombok.Getter;
-import lombok.Setter;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -22,5 +22,4 @@ public class TestRecordUpdateRequest {
 
     @NotNull(message = "バージョンは必須です")
     private Long version;
-
 }

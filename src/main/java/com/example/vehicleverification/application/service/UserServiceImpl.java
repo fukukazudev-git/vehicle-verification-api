@@ -1,22 +1,19 @@
 package com.example.vehicleverification.application.service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-
-import com.example.vehicleverification.domain.entity.User;
-import com.example.vehicleverification.domain.exception.DuplicateResourceException;
-import com.example.vehicleverification.domain.repository.UserRepository;
 import com.example.vehicleverification.application.dto.user.UserCreateRequest;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import com.example.vehicleverification.application.dto.user.UserCreateResponse;
 import com.example.vehicleverification.application.dto.user.UserDetailResponse;
 import com.example.vehicleverification.application.dto.user.UserDto;
 import com.example.vehicleverification.application.dto.user.UserUpdateRequest;
 import com.example.vehicleverification.application.dto.user.UserUpdateResponse;
+import com.example.vehicleverification.domain.entity.User;
+import com.example.vehicleverification.domain.exception.DuplicateResourceException;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
-
+import com.example.vehicleverification.domain.repository.UserRepository;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -46,16 +43,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> getUserAll() {
-        return userRepository.findAll()
-                .stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+        return userRepository.findAll().stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
     @Override
     public UserDetailResponse getUserById(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id));
+        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
 
         return new UserDetailResponse(
                 user.getId(),
@@ -93,8 +86,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserUpdateResponse updateUser(Long id, UserUpdateRequest request) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id));
+        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
 
         user.setDisplayName(request.getDisplayName());
         user.setRole(request.getRole());
@@ -113,11 +105,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteUser(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id));
+        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
 
         userRepository.delete(user);
-
     }
-
 }

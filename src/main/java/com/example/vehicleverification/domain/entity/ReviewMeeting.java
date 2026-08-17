@@ -2,24 +2,21 @@ package com.example.vehicleverification.domain.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 
 @Entity
 @Table(name = "review_meetings")
@@ -71,11 +68,16 @@ public class ReviewMeeting {
     @Version
     private Long version;
 
-    protected ReviewMeeting() {
-    }
+    protected ReviewMeeting() {}
 
-    public ReviewMeeting(Model model, String title, LocalDate scheduledDate,
-            String status, User organizer, String notes, String eventCode) {
+    public ReviewMeeting(
+            Model model,
+            String title,
+            LocalDate scheduledDate,
+            String status,
+            User organizer,
+            String notes,
+            String eventCode) {
         this.model = model;
         this.title = title;
         this.scheduledDate = scheduledDate;
@@ -84,5 +86,4 @@ public class ReviewMeeting {
         this.notes = notes;
         this.eventCode = eventCode;
     }
-
 }

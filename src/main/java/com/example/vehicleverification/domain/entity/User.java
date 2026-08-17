@@ -1,20 +1,17 @@
 package com.example.vehicleverification.domain.entity;
 
-import java.time.LocalDateTime;
-
-import org.hibernate.annotations.CreationTimestamp;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "users")
@@ -49,8 +46,7 @@ public class User {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    protected User() {
-    }
+    protected User() {}
 
     public User(String username, String password, String displayName, String role, String department) {
         this.username = username;
@@ -59,5 +55,4 @@ public class User {
         this.role = role;
         this.department = department;
     }
-
 }

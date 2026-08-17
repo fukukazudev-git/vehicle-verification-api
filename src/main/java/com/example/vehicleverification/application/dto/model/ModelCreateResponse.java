@@ -1,7 +1,6 @@
 package com.example.vehicleverification.application.dto.model;
 
 import java.time.LocalDateTime;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,8 +20,17 @@ public class ModelCreateResponse {
     private String powertrainType;
     private LocalDateTime createdAt;
 
-    public ModelCreateResponse(Long id, String modelCode, String modelName, Integer modelYear, String ecuType,
-            String engineType, String driveType, String description, LocalDateTime createdAt, String destination,
+    public ModelCreateResponse(
+            Long id,
+            String modelCode,
+            String modelName,
+            Integer modelYear,
+            String ecuType,
+            String engineType,
+            String driveType,
+            String description,
+            LocalDateTime createdAt,
+            String destination,
             String powertrainType) {
         this.id = id;
         this.modelCode = modelCode;
@@ -36,5 +44,4 @@ public class ModelCreateResponse {
         this.destination = destination;
         this.powertrainType = powertrainType;
     }
-
 }

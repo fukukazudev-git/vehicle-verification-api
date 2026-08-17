@@ -1,24 +1,20 @@
 package com.example.vehicleverification.application.service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-
-import com.example.vehicleverification.domain.entity.Model;
-import com.example.vehicleverification.domain.exception.DuplicateResourceException;
-import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
-import com.example.vehicleverification.domain.repository.ModelRepository;
 import com.example.vehicleverification.application.dto.model.ModelCreateRequest;
 import com.example.vehicleverification.application.dto.model.ModelCreateResponse;
 import com.example.vehicleverification.application.dto.model.ModelDetailResponse;
 import com.example.vehicleverification.application.dto.model.ModelDto;
 import com.example.vehicleverification.application.dto.model.ModelUpdateRequest;
 import com.example.vehicleverification.application.dto.model.ModelUpdateResponse;
-
-import org.springframework.transaction.annotation.Transactional;
-
+import com.example.vehicleverification.domain.entity.Model;
+import com.example.vehicleverification.domain.exception.DuplicateResourceException;
+import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
+import com.example.vehicleverification.domain.repository.ModelRepository;
 import jakarta.persistence.OptimisticLockException;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 // 参照系を既定とし、更新系のメソッドで個別に上書きする
@@ -48,16 +44,12 @@ public class ModelServiceImpl implements ModelService {
 
     @Override
     public List<ModelDto> getModelAll() {
-        return modelRepository.findAll()
-                .stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+        return modelRepository.findAll().stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
     @Override
     public ModelDetailResponse getModelById(Long id) {
-        Model model = modelRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id));
+        Model model = modelRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
 
         return new ModelDetailResponse(
                 model.getId(),
@@ -110,8 +102,7 @@ public class ModelServiceImpl implements ModelService {
     @Override
     @Transactional
     public ModelUpdateResponse updateModel(Long id, ModelUpdateRequest request) {
-        Model model = modelRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id));
+        Model model = modelRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
 
         if (!model.getVersion().equals(request.getVersion())) {
             throw new OptimisticLockException();
@@ -154,10 +145,8 @@ public class ModelServiceImpl implements ModelService {
     @Override
     @Transactional
     public void deleteModel(Long id) {
-        Model model = modelRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id));
+        Model model = modelRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
 
         modelRepository.delete(model);
     }
-
 }

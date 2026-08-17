@@ -32,5 +32,4 @@ public class ReviewMeetingUpdateRequest {
 
     @NotNull
     private Long version;
-
 }

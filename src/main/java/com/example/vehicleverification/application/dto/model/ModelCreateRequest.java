@@ -47,5 +47,4 @@ public class ModelCreateRequest {
     @NotBlank(message = "パワートレインタイプは必須です")
     @Size(max = 20, message = "パワートレインタイプは20文字以内で入力してください")
     private String powertrainType;
-
 }

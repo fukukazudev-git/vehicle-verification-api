@@ -1,9 +1,9 @@
 package com.example.vehicleverification.application.dto.reviewmeeting;
 
-import lombok.Getter;
-import lombok.Setter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.Setter;
 
 // 一覧用
 @Getter
@@ -21,8 +21,17 @@ public class ReviewMeetingDto {
     private LocalDateTime createdAt;
     private String eventCode;
 
-    public ReviewMeetingDto(Long id, String title, LocalDate scheduledDate, String status, Long modelId,
-            String modelName, Long organizerId, String organizerName, LocalDateTime createdAt, String eventCode) {
+    public ReviewMeetingDto(
+            Long id,
+            String title,
+            LocalDate scheduledDate,
+            String status,
+            Long modelId,
+            String modelName,
+            Long organizerId,
+            String organizerName,
+            LocalDateTime createdAt,
+            String eventCode) {
         this.id = id;
         this.title = title;
         this.scheduledDate = scheduledDate;
@@ -34,5 +43,4 @@ public class ReviewMeetingDto {
         this.createdAt = createdAt;
         this.eventCode = eventCode;
     }
-
 }

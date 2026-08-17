@@ -1,12 +1,12 @@
 package com.example.vehicleverification.application.service;
 
-import java.util.List;
 import com.example.vehicleverification.application.dto.testrecord.TestRecordCreateRequest;
 import com.example.vehicleverification.application.dto.testrecord.TestRecordCreateResponse;
-import com.example.vehicleverification.application.dto.testrecord.TestRecordUpdateRequest;
-import com.example.vehicleverification.application.dto.testrecord.TestRecordUpdateResponse;
 import com.example.vehicleverification.application.dto.testrecord.TestRecordDetailResponse;
 import com.example.vehicleverification.application.dto.testrecord.TestRecordDto;
+import com.example.vehicleverification.application.dto.testrecord.TestRecordUpdateRequest;
+import com.example.vehicleverification.application.dto.testrecord.TestRecordUpdateResponse;
+import java.util.List;
 
 public interface TestRecordService {
 
@@ -19,5 +19,4 @@ public interface TestRecordService {
     TestRecordUpdateResponse updateTestRecord(Long id, TestRecordUpdateRequest request);
 
     void deleteTestRecord(Long id);
-
 }

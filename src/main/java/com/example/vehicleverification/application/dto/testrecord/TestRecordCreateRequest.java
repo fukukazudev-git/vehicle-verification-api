@@ -25,5 +25,4 @@ public class TestRecordCreateRequest {
 
     @NotNull(message = "テスト者IDは必須です")
     private Long recordedById;
-
 }
