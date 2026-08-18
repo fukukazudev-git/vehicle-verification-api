@@ -29,7 +29,7 @@ public class CustomUserDetailsService implements org.springframework.security.co
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
                 .password(user.getPassword()) // DBのハッシュ済みパスワード
-                .roles(user.getRole())
+                .roles(user.getRole()) // ここでROLE_を前置してGrantAuthority(""ROLE_XXX")を生成
                 .build();
     }
 }

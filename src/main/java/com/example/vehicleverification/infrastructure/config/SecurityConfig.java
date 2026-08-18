@@ -1,9 +1,11 @@
 package com.example.vehicleverification.infrastructure.config;
 
+import com.example.vehicleverification.infrastructure.security.JwtAccessDeniedHandler;
+import com.example.vehicleverification.infrastructure.security.JwtAuthenticationEntryPoint;
 import com.example.vehicleverification.infrastructure.security.JwtAuthenticationFilter;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,8 +23,17 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
+            JwtAccessDeniedHandler jwtAccessDeniedHandler) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+        this.jwtAccessDeniedHandler = jwtAccessDeniedHandler;
     }
 
     // Springがパスワード照合に使用
@@ -45,14 +56,21 @@ public class SecurityConfig {
 
         http
                 // httpBasic認証を無効化するとデフォルトでは403にフォールバックするため401を返すEntryPointを明示
-                .exceptionHandling(e -> e.authenticationEntryPoint((request, response, authException) ->
-                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED))) // 認証失敗時は401を返す
+                // 未認証は401、認可拒否(権限不足)は403を、いずれもJSONで返す
+                .exceptionHandling(e -> e.authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                        .accessDeniedHandler(jwtAccessDeniedHandler))
                 .csrf(csrf -> csrf.disable()) // 認証情報はAuthorizationヘッダーで明示送信&ステートレスであるためCSRF対策無効化
                 .sessionManagement(s ->
                         s.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // JWT認証のため認証状態はサーバに保持せず、JWTで自己申告させる
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**")
                         .permitAll()
-                        .anyRequest()
+                        .requestMatchers(HttpMethod.POST, "/api/users")
+                        .hasRole("ADMIN") // ユーザ登録は管理者のみ許可
+                        .requestMatchers(HttpMethod.PUT, "/api/users/*")
+                        .hasRole("ADMIN") // ユーザ更新は管理者のみ許可
+                        .requestMatchers(HttpMethod.DELETE, "/api/users/*")
+                        .hasRole("ADMIN") // ユーザ削除は管理者のみ許可
+                        .anyRequest() // マッチャは上から順に評価されるため具体的なルールをこの位置より前に置く
                         .authenticated()) // /api/auth/**以外は認証必須
                 .addFilterBefore(
                         jwtAuthenticationFilter,
