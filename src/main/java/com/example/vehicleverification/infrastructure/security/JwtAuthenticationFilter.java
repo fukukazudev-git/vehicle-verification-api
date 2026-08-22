@@ -1,5 +1,6 @@
 package com.example.vehicleverification.infrastructure.security;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,6 +9,7 @@ import java.io.IOException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -32,40 +34,36 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String header = request.getHeader("Authorization");
 
-        // Authorizationヘッダがない、またはBearerトークンでない場合はそのまま次のフィルタに処理を渡す
+        // Authorizationヘッダがない/Bearerトークンでなければ素通し(EntryPointが最終的に401判定)
         if (header == null || !header.startsWith("Bearer ")) {
 
             filterChain.doFilter(request, response);
             return;
+        }
+        String token = header.substring(7);
 
-        } else {
+        // Bearer以降を切り出したトークン文字列に対して、署名検証・有効期限検証を行う
+        try {
 
-            String token = header.substring(7);
+            // パースは1回のみ(署名有効期限検証も兼ねる)。不正なら例外処理
+            String username = jwtTokenProvider.getUsernameFromToken(token);
+            UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
 
-            // Bearer以降を切り出したトークン文字列に対して、署名検証・有効期限検証を行う
-            if (!jwtTokenProvider.validateToken(token)) {
+            // Spring Securityの認証情報をSecurityContextにセットする
+            // 2引数版のコンストラクタは未認証扱いのため、3引数版のコンストラクタを使って認証済み扱いにする
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                    userDetails, // principal (本人)
+                    null, // credentials (パスワードは不要)
+                    userDetails.getAuthorities()); // 権限リスト
 
-                filterChain.doFilter(request, response);
-                return;
+            // IP 等の付帯情報も載せる
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            // トークン完成後にContextに入れる
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            } else {
-
-                String username = jwtTokenProvider.getUsernameFromToken(token);
-                UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
-
-                // Spring Securityの認証情報をSecurityContextにセットする
-                // 2引数版のコンストラクタは未認証扱いのため、3引数版のコンストラクタを使って認証済み扱いにする
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails, // principal (本人)
-                        null, // credentials (パスワードは不要)
-                        userDetails.getAuthorities()); // 権限リスト
-
-                // IP 等の付帯情報も載せる
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                // トークン完成後にContextに入れる
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            }
+        } catch (JwtException | IllegalArgumentException | UsernameNotFoundException e) {
+            // トークン不正 or 該当ユーザー無し → 認証情報を入れずに継続。EntryPointが401 JSONを返す
+            SecurityContextHolder.clearContext();
         }
 
         // 次のフィルタに処理を渡す

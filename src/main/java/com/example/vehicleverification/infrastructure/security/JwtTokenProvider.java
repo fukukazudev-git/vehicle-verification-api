@@ -1,7 +1,6 @@
 package com.example.vehicleverification.infrastructure.security;
 
 import com.example.vehicleverification.infrastructure.config.JwtProperties;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
@@ -37,21 +36,6 @@ public class JwtTokenProvider {
                 .expiration(new Date(now + jwtProperties.getExpiration())) // exp 有効期限
                 .signWith(key, Jwts.SIG.HS256) // alg を明示
                 .compact(); // 文字列化して返す
-    }
-
-    // 署名検証・有効期限検証
-    // 例外はcatchして返す
-    public boolean validateToken(String token) {
-        try {
-
-            Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
-            return true;
-
-        } catch (JwtException | IllegalArgumentException e) {
-
-            // 例外はログに残さずfalseを返す
-            return false;
-        }
     }
 
     // usernameをJWTから抽出
