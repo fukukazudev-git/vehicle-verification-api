@@ -8,7 +8,7 @@ plugins {
 spotless {
 	java {
 		target 'src/**/*.java'
-		palantirJavaFormat()
+		palantirJavaFormat('2.74.0')
 	}
 }
 
