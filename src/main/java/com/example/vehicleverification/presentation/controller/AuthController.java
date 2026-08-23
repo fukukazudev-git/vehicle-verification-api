@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+// ログイン認証を受け付けるController
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
+    // Configで@Bean化したAuthenticationManagerをDIし、AuthControllerから認証処理を呼び出す
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -32,15 +34,15 @@ public class AuthController {
         UsernamePasswordAuthenticationToken authRequest =
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword());
 
-        // 認証実行
+        // AuthenticationManagerに認証トークンを渡すと、CustomUserDetailsServiceが呼ばれ、DBのユーザ情報と照合される
         Authentication authentication = authenticationManager.authenticate(authRequest);
 
-        // JWT発行
+        // 認証成功時はAuthenticationManagerが返すAuthenticationに、認証済みのユーザ情報と権限が入っている
         String token = jwtTokenProvider.generateToken(authentication.getName());
 
-        // roleを取り出してLoginResponseを返す
+        // Spring Securityの認証情報から権限を取り出す。GrantedAuthorityの文字列はROLE_XXX形式なので、ROLE_を削除する
         String role =
-                authentication.getAuthorities().iterator().next().getAuthority().replace("ROLE_", ""); // ROLE_を削除して返す
+                authentication.getAuthorities().iterator().next().getAuthority().replace("ROLE_", "");
 
         return new LoginResponse(token, authentication.getName(), role);
     }

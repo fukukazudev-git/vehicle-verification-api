@@ -47,8 +47,6 @@ public class ReviewMeeting {
     @Size(max = 20)
     private String status;
 
-    // DB側の設定で organizer_idカラムはusersテーブルを参照する外部キー制約が設定されているため、
-    // usersテーブルのidカラムを参照することが可能。
     // user.getUsername()のようにオブジェクトの関連をたどるとJPA/HibernateがSQLを発行する。
     // → SELECT * FROM users WHERE id = ? のtupleがUserオブジェクトとして返される
     @ManyToOne(fetch = FetchType.LAZY)

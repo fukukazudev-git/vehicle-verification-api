@@ -4,7 +4,6 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
-// ログイン入力用DTO
 @Getter
 @Setter
 public class LoginRequest {

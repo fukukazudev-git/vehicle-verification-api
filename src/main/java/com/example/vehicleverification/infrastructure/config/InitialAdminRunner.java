@@ -37,6 +37,7 @@ public class InitialAdminRunner implements CommandLineRunner {
         this.passwordEncoder = passwordEncoder;
     }
 
+    // CommandLineRunnerのrun()はSpring Boot起動時に呼ばれる
     @Override
     public void run(String... args) throws Exception {
 
@@ -44,11 +45,7 @@ public class InitialAdminRunner implements CommandLineRunner {
         if (userRepository.count() == 0) {
 
             User admin = new User(
-                    adminUsername,
-                    passwordEncoder.encode(adminPassword), // ハッシュ化
-                    adminDisplayName,
-                    "ADMIN",
-                    adminDepartment);
+                    adminUsername, passwordEncoder.encode(adminPassword), adminDisplayName, "ADMIN", adminDepartment);
 
             userRepository.save(admin);
 

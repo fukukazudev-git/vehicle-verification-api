@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
 
 // フィルタ層ではControllerAdviceが効かないためレスポンスに直接JSONに書き込む
+// 未認証時に401を返すためのEntryPoint。AccessDeniedHandlerと対になる。
+// フィルタ層のエラーはセキュリティの部品としてここで処理する
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
