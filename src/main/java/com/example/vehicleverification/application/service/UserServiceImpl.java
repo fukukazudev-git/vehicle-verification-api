@@ -23,7 +23,6 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
-    // パスワードのハッシュ化に使用するPasswordEncoderをDIする
     private final PasswordEncoder passwordEncoder;
 
     public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {

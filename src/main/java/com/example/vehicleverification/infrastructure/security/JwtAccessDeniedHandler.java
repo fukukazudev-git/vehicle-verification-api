@@ -14,6 +14,7 @@ import tools.jackson.databind.ObjectMapper;
 // 認可拒否(権限不足)時に、EntryPoint(401)と対になる形で 403 の JSON を直接返す。
 // デフォルトの AccessDeniedHandler は sendError(403) で /error ディスパッチを起こし、
 // ステートレス構成では再認証チェックで 401 にすり替わってしまうため、直接書き込む。
+// フィルタ層のエラーはセキュリティの部品としてここで処理する
 @Component
 public class JwtAccessDeniedHandler implements AccessDeniedHandler {
 

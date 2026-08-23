@@ -8,7 +8,7 @@ import java.util.Date;
 import javax.crypto.SecretKey;
 import org.springframework.stereotype.Component;
 
-// トークン生成・検証・ユーザ名抽出
+// トークンの生成とユーザ名抽出（抽出時に署名・有効期限も検証）
 @Component
 public class JwtTokenProvider {
 
@@ -20,7 +20,8 @@ public class JwtTokenProvider {
     public JwtTokenProvider(JwtProperties jwtProperties) {
 
         this.jwtProperties = jwtProperties;
-        // SecretKeyを生成する際に、文字列をバイト配列に変換する
+
+        // SecretKeyを生成する際に、JWTの署名アルゴリズムに応じた長さのバイト列が必要
         this.key = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8));
     }
 
@@ -35,13 +36,12 @@ public class JwtTokenProvider {
                 .issuedAt(new Date(now)) // iat 発行時刻
                 .expiration(new Date(now + jwtProperties.getExpiration())) // exp 有効期限
                 .signWith(key, Jwts.SIG.HS256) // alg を明示
-                .compact(); // 文字列化して返す
+                .compact(); // 文字列化
     }
 
-    // usernameをJWTから抽出
+    // JWTをパースしてユーザ名を取得する。署名検証・有効期限検証も同時に行う
     public String getUsernameFromToken(String token) {
 
-        // チェーンでsubを取得する
         return Jwts.parser()
                 .verifyWith(key)
                 .build()

@@ -27,22 +27,23 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 // (型変換失敗・JSONパース失敗・未対応メソッドなど)が基底クラスの個別ハンドラに
 // マッチするようになる。継承しない場合、下のhandleExceptionが先に全部拾ってしまい
 // 本来4xxで返すべきクライアント起因のエラーが500になる
+// DispatchServlet = Controller層で発生した例外のみ拾う
+// → 認証・認可の失敗は手前のSpringSecurityのフィルタ層で発生(Controllerに到達する前)するため、ControllerAdviceは拾えない
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    // ResourceNotFoundExceptionの例外処理ハンドラ
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFound(
             ResourceNotFoundException ex, HttpServletRequest request) {
 
         ErrorResponse body = new ErrorResponse(
                 HttpStatus.NOT_FOUND.value(), // status 404
-                HttpStatus.NOT_FOUND.getReasonPhrase(), // error "Not Found"
-                ex.getMessage(), // message "Resource not found"
-                request.getRequestURI(), // path "/users/{id}"
-                null); // fieldErrors null
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI(),
+                null);
 
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
@@ -54,7 +55,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             DuplicateResourceException ex, HttpServletRequest request) {
 
         ErrorResponse body = new ErrorResponse(
-                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.value(), // status 409
                 HttpStatus.CONFLICT.getReasonPhrase(),
                 ex.getMessage(),
                 request.getRequestURI(),
@@ -95,13 +96,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.CONFLICT);
     }
 
-    // 401 Unauthorizedの例外処理ハンドラ
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthenticationException(
             AuthenticationException ex, HttpServletRequest request) {
 
         ErrorResponse body = new ErrorResponse(
-                HttpStatus.UNAUTHORIZED.value(),
+                HttpStatus.UNAUTHORIZED.value(), // status 401
                 HttpStatus.UNAUTHORIZED.getReasonPhrase(),
                 "ユーザー名またはパスワードが正しくありません。",
                 request.getRequestURI(),
@@ -110,7 +110,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
     }
 
-    // その他の予期しない例外は500 Internal Server Errorとして処理する
+    // その他の予期しない例外は Internal Server Errorとして処理する
     // 基底クラスが宣言している標準例外は、より具体的な型としてそちらが優先されるため
     // ここには本当に想定外のものだけが来る
     @ExceptionHandler(Exception.class)
@@ -120,7 +120,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         log.error("予期しないエラーが発生しました: {}", request.getRequestURI(), ex);
 
         ErrorResponse body = new ErrorResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(), // status 500
                 HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
                 "サーバーエラーが発生しました。",
                 request.getRequestURI(),
@@ -141,7 +141,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .toList();
 
         ErrorResponse body = new ErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.value(), // status 400
                 HttpStatus.BAD_REQUEST.getReasonPhrase(),
                 "入力値が不正です。",
                 resolvePath(request),

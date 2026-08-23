@@ -44,6 +44,8 @@ public class SecurityConfig {
     }
 
     // AuthControllerがログイン認証に使用する
+    // PasswordEncoder と CustomUserDetailsService が揃うとSpringが内部でDaoAuthenticationProviderを生成、
+    // AuthenticationManagerはこれを経由して「username + password」を検証可能になる
     // DaoAuthenticationProviderが使用するAuthenticationManagerを取り出して@Beanとして再公開
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
@@ -55,8 +57,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                // httpBasic認証を無効化するとデフォルトでは403にフォールバックするため401を返すEntryPointを明示
-                // 未認証は401、認可拒否(権限不足)は403を、いずれもJSONで返す
+                // AuthenticationEntryPointとAccessDeniedHandlerを設定する(ExceptionTranslationFilterの振り分け先に登録)ことで、
+                // 認証失敗時・認可失敗時にJSONを返す設定
                 .exceptionHandling(e -> e.authenticationEntryPoint(jwtAuthenticationEntryPoint)
                         .accessDeniedHandler(jwtAccessDeniedHandler))
                 .csrf(csrf -> csrf.disable()) // 認証情報はAuthorizationヘッダーで明示送信&ステートレスであるためCSRF対策無効化
@@ -75,6 +77,8 @@ public class SecurityConfig {
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class); // 標準の認証フィルタの前にJWT認証フィルタを挿入する
+        // 内部実装ではこの位置でExceptionTranslationFilter(後続の例外を補足)
+        // → AuthorizationFilter (authorizeHttpRequestsのルールを判定し、拒否なら例外を投げる)
 
         return http.build();
     }
