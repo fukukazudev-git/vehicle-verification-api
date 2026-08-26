@@ -98,6 +98,7 @@ public class ReviewMeetingControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(response.getId()))
+                // レスポンス側の検証: Serviceの戻り値(response)が正しくJSONにシリアライズされているか
                 .andExpect(jsonPath("$.title").value(response.getTitle()));
 
         // Assert
@@ -105,6 +106,7 @@ public class ReviewMeetingControllerTest {
         verify(reviewMeetingService).createReviewMeeting(captor.capture());
 
         ReviewMeetingCreateRequest captured = captor.getValue();
+        // リクエスト側の検証: 送信したJSON(request)が正しくDTOにデシリアライズされ、Serviceに渡っているか
         assertThat(captured.getTitle()).isEqualTo("定例レビュー");
         assertThat(captured.getModelId()).isEqualTo(1L);
         assertThat(captured.getScheduledDate()).isEqualTo(scheduledDate);
