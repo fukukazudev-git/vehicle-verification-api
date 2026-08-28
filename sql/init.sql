@@ -67,3 +67,19 @@ CREATE TABLE IF NOT EXISTS attachments (
     FOREIGN KEY (test_record_id) REFERENCES test_records(id),
     FOREIGN KEY (uploaded_by) REFERENCES users(id)
 );
+
+CREATE TABLE IF NOT EXISTS issues (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    review_meeting_id BIGINT NOT NULL,
+    content TEXT NOT NULL,
+    reporter_id BIGINT NOT NULL,
+    answer TEXT,
+    answerer_id BIGINT,
+    resolved_at DATE,
+    status VARCHAR(20) NOT NULL DEFAULT '未対応',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    version BIGINT NOT NULL DEFAULT 0,
+    FOREIGN KEY (review_meeting_id) REFERENCES review_meetings(id),
+    FOREIGN KEY (reporter_id) REFERENCES users(id),
+    FOREIGN KEY (answerer_id) REFERENCES users(id)
+);
