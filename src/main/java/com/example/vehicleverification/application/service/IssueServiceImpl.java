@@ -96,7 +96,7 @@ public class IssueServiceImpl implements IssueService {
                 .findById(request.getReporterId())
                 .orElseThrow(() -> new ResourceNotFoundException(request.getReporterId()));
 
-        Issue issue = new Issue(reviewMeeting, request.getContent(), reporter, null);
+        Issue issue = new Issue(reviewMeeting, request.getContent(), reporter, "未対応");
 
         Issue saved = issueRepository.save(issue);
 

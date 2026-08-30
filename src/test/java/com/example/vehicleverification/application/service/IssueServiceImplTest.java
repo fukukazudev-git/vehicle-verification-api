@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -132,6 +133,29 @@ public class IssueServiceImplTest {
         assertThat(response.getContent()).isEqualTo(request.getContent());
         assertThat(response.getReviewMeetingId()).isEqualTo(reviewMeeting.getId());
         assertThat(response.getReporterId()).isEqualTo(reporter.getId());
+    }
+
+    @Test
+    void createIssue_status未指定でも初期値未対応で保存される() {
+        Issue issue = createDummyIssue(1L, null, null, 0L);
+        ReviewMeeting reviewMeeting = issue.getReviewMeeting();
+        User reporter = issue.getReporter();
+
+        IssueCreateRequest request = new IssueCreateRequest();
+        request.setReviewMeetingId(reviewMeeting.getId());
+        request.setContent(issue.getContent());
+        request.setReporterId(reporter.getId());
+
+        given(reviewMeetingRepository.findById(reviewMeeting.getId())).willReturn(Optional.of(reviewMeeting));
+        given(userRepository.findById(reporter.getId())).willReturn(Optional.of(reporter));
+        given(issueRepository.save(any(Issue.class))).willReturn(issue);
+
+        issueService.createIssue(request);
+
+        // saveに渡るIssueのstatusが、DBのNOT NULLを満たす初期値"未対応"になっていること
+        ArgumentCaptor<Issue> captor = ArgumentCaptor.forClass(Issue.class);
+        verify(issueRepository).save(captor.capture());
+        assertThat(captor.getValue().getStatus()).isEqualTo("未対応");
     }
 
     @Test

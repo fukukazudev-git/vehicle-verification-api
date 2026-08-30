@@ -11,7 +11,7 @@ import java.util.List;
 public interface IssueService {
     List<IssueDto> getIssueAll(Long reviewMeetingId, String status);
 
-    IssueDetailResponse getIssueById(Long Id);
+    IssueDetailResponse getIssueById(Long id);
 
     IssueCreateResponse createIssue(IssueCreateRequest request);
 
