@@ -58,13 +58,15 @@ CREATE TABLE IF NOT EXISTS attachments (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     review_meeting_id BIGINT,
     test_record_id BIGINT,
+    user_id BIGINT NOT NULL,
     file_name VARCHAR(255) NOT NULL,
     stored_path VARCHAR(500) NOT NULL,
-    file_type VARCHAR(50),
+    file_type VARCHAR(50) NOT NULL,
     uploaded_by BIGINT NOT NULL,
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (review_meeting_id) REFERENCES review_meetings(id),
     FOREIGN KEY (test_record_id) REFERENCES test_records(id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (uploaded_by) REFERENCES users(id)
 );
 
