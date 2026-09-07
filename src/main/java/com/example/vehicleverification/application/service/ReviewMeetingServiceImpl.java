@@ -1,15 +1,18 @@
 package com.example.vehicleverification.application.service;
 
+import com.example.vehicleverification.application.dto.attachment.AttachmentDto;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingCreateRequest;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingCreateResponse;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingDetailResponse;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingDto;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingUpdateRequest;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingUpdateResponse;
+import com.example.vehicleverification.domain.entity.Attachment;
 import com.example.vehicleverification.domain.entity.Model;
 import com.example.vehicleverification.domain.entity.ReviewMeeting;
 import com.example.vehicleverification.domain.entity.User;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
+import com.example.vehicleverification.domain.repository.AttachmentRepository;
 import com.example.vehicleverification.domain.repository.ModelRepository;
 import com.example.vehicleverification.domain.repository.ReviewMeetingRepository;
 import com.example.vehicleverification.domain.repository.UserRepository;
@@ -26,14 +29,17 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
     private final ReviewMeetingRepository reviewMeetingRepository;
     private final ModelRepository modelRepository;
     private final UserRepository userRepository;
+    private final AttachmentRepository attachmentRepository;
 
     public ReviewMeetingServiceImpl(
             ReviewMeetingRepository reviewMeetingRepository,
             ModelRepository modelRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            AttachmentRepository attachmentRepository) {
         this.reviewMeetingRepository = reviewMeetingRepository;
         this.modelRepository = modelRepository;
         this.userRepository = userRepository;
+        this.attachmentRepository = attachmentRepository;
     }
 
     private ReviewMeetingDto convertToDto(ReviewMeeting reviewMeeting) {
@@ -48,6 +54,22 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
                 reviewMeeting.getOrganizer().getUsername(),
                 reviewMeeting.getCreatedAt(),
                 reviewMeeting.getEventCode());
+    }
+
+    private AttachmentDto convertToAttachmentDto(Attachment attachment) {
+        return new AttachmentDto(
+                attachment.getId(),
+                attachment.getFileName(),
+                attachment.getFileType(),
+                attachment.getStoredPath(),
+                attachment.getReviewMeeting() != null
+                        ? attachment.getReviewMeeting().getId()
+                        : null,
+                attachment.getTestRecord() != null ? attachment.getTestRecord().getId() : null,
+                attachment.getUser() != null ? attachment.getUser().getId() : null,
+                attachment.getUploadedBy().getId(),
+                attachment.getUploadedBy().getDisplayName(),
+                attachment.getUploadedAt());
     }
 
     @Override
@@ -77,6 +99,8 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
         ReviewMeeting reviewMeeting =
                 reviewMeetingRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
 
+        List<Attachment> attachments = attachmentRepository.findByReviewMeetingId(reviewMeeting.getId());
+
         return new ReviewMeetingDetailResponse(
                 reviewMeeting.getId(),
                 reviewMeeting.getTitle(),
@@ -89,7 +113,8 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
                 reviewMeeting.getOrganizer().getUsername(),
                 reviewMeeting.getCreatedAt(),
                 reviewMeeting.getVersion(),
-                reviewMeeting.getEventCode());
+                reviewMeeting.getEventCode(),
+                attachments.stream().map(this::convertToAttachmentDto).collect(Collectors.toList()));
     }
 
     @Override

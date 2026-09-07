@@ -144,7 +144,8 @@ public class ReviewMeetingControllerTest {
                 "主催者名",
                 LocalDateTime.now(),
                 0L,
-                "EVT001");
+                "EVT001",
+                null);
 
         given(reviewMeetingService.getReviewMeetingById(eq(1L))).willReturn(response);
 

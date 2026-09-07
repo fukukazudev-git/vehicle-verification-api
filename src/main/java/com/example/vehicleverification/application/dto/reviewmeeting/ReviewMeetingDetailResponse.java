@@ -1,7 +1,9 @@
 package com.example.vehicleverification.application.dto.reviewmeeting;
 
+import com.example.vehicleverification.application.dto.attachment.AttachmentDto;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,4 +25,5 @@ public class ReviewMeetingDetailResponse {
     private LocalDateTime createdAt;
     private Long version;
     private String eventCode;
+    private List<AttachmentDto> attachments;
 }
