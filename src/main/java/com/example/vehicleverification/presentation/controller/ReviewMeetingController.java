@@ -9,6 +9,7 @@ import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeeti
 import com.example.vehicleverification.application.service.ReviewMeetingService;
 import jakarta.validation.Valid;
 import java.util.List;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -41,6 +43,7 @@ public class ReviewMeetingController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public ReviewMeetingCreateResponse createReviewMeeting(@Valid @RequestBody ReviewMeetingCreateRequest request) {
         return reviewMeetingService.createReviewMeeting(request);
     }
@@ -52,6 +55,7 @@ public class ReviewMeetingController {
     }
 
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteReviewMeeting(@PathVariable Long id) {
         reviewMeetingService.deleteReviewMeeting(id);
     }
