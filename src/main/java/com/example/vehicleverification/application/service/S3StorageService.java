@@ -1,10 +1,9 @@
 package com.example.vehicleverification.application.service;
 
-import jakarta.annotation.PostConstruct;
+import com.example.vehicleverification.infrastructure.config.StorageProperties;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,19 +19,15 @@ import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignReques
 @Service
 @Profile("prod")
 public class S3StorageService implements StorageService {
-    @Value("${storage.s3.bucket}")
-    private String bucket;
 
-    @Value("${storage.s3.region:us-east-1}")
-    private String region;
+    private final String bucket;
+    private final S3Client s3Client;
+    private final S3Presigner presigner;
 
-    private S3Client s3Client;
-    private S3Presigner presigner;
-
-    // フィールド注入後に初期化する
-    @PostConstruct
-    public void init() {
-        Region r = Region.of(region);
+    // コンストラクタ注入で region が確定するため、ここでクライアントを組み立てる
+    public S3StorageService(StorageProperties properties) {
+        this.bucket = properties.getS3().getBucket();
+        Region r = Region.of(properties.getS3().getRegion());
         this.s3Client = S3Client.builder().region(r).build();
         this.presigner = S3Presigner.builder().region(r).build();
     }

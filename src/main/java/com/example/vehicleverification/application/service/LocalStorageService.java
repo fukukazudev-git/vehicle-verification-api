@@ -1,11 +1,11 @@
 package com.example.vehicleverification.application.service;
 
+import com.example.vehicleverification.infrastructure.config.StorageProperties;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,8 +14,11 @@ import org.springframework.web.multipart.MultipartFile;
 @Profile("local")
 public class LocalStorageService implements StorageService {
 
-    @Value("${storage.local.path:./uploads}")
-    private String storagePath;
+    private final String storagePath;
+
+    public LocalStorageService(StorageProperties properties) {
+        this.storagePath = properties.getLocal().getPath();
+    }
 
     @Override
     public String store(MultipartFile file, String key) {
