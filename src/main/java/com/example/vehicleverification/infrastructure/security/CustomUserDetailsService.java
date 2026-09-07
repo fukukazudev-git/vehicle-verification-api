@@ -3,13 +3,14 @@ package com.example.vehicleverification.infrastructure.security;
 import com.example.vehicleverification.domain.entity.User;
 import com.example.vehicleverification.domain.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 // DBからユーザ情報を取得して、Spring SecurityのUserDetailsに変換する
 // パスワード照合そのものはSpring Securityが行うので、ここではハッシュ済みパスワードを返すのみ
 @Service
-public class CustomUserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService {
+public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
 

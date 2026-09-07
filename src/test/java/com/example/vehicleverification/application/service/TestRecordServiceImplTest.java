@@ -13,6 +13,7 @@ import com.example.vehicleverification.domain.entity.ReviewMeeting;
 import com.example.vehicleverification.domain.entity.TestRecord;
 import com.example.vehicleverification.domain.entity.User;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
+import com.example.vehicleverification.domain.repository.AttachmentRepository;
 import com.example.vehicleverification.domain.repository.ReviewMeetingRepository;
 import com.example.vehicleverification.domain.repository.TestRecordRepository;
 import com.example.vehicleverification.domain.repository.UserRepository;
@@ -36,6 +37,9 @@ class TestRecordServiceImplTest {
 
     @Mock
     private TestRecordRepository testRecordRepository;
+
+    @Mock
+    private AttachmentRepository attachmentRepository;
 
     @InjectMocks
     private TestRecordServiceImpl testRecordService;

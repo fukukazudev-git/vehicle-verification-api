@@ -21,6 +21,10 @@ public class CustomUserDetails implements UserDetails {
         this.role = user.getRole();
     }
 
+    public Long getId() {
+        return id;
+    }
+
     @Override
     public String getUsername() {
         return username;
@@ -29,10 +33,6 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public String getPassword() {
         return password;
-    }
-
-    public Long getId() {
-        return id;
     }
 
     @Override

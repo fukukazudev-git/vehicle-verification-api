@@ -1,5 +1,6 @@
 package com.example.vehicleverification.application.service;
 
+import java.time.LocalDateTime;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface StorageService {
@@ -8,4 +9,6 @@ public interface StorageService {
     String getDownloadUrl(String storedPath);
 
     void delete(String storedPath);
+
+    LocalDateTime getUrlExpiration();
 }

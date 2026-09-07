@@ -1,14 +1,17 @@
 package com.example.vehicleverification.application.service;
 
+import com.example.vehicleverification.application.dto.attachment.AttachmentDto;
 import com.example.vehicleverification.application.dto.user.UserCreateRequest;
 import com.example.vehicleverification.application.dto.user.UserCreateResponse;
 import com.example.vehicleverification.application.dto.user.UserDetailResponse;
 import com.example.vehicleverification.application.dto.user.UserDto;
 import com.example.vehicleverification.application.dto.user.UserUpdateRequest;
 import com.example.vehicleverification.application.dto.user.UserUpdateResponse;
+import com.example.vehicleverification.domain.entity.Attachment;
 import com.example.vehicleverification.domain.entity.User;
 import com.example.vehicleverification.domain.exception.DuplicateResourceException;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
+import com.example.vehicleverification.domain.repository.AttachmentRepository;
 import com.example.vehicleverification.domain.repository.UserRepository;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,12 +25,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-
     private final PasswordEncoder passwordEncoder;
+    private final AttachmentRepository attachmentRepository;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(
+            UserRepository userRepository, PasswordEncoder passwordEncoder, AttachmentRepository attachmentRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.attachmentRepository = attachmentRepository;
     }
 
     private UserDto convertToDto(User user) {
@@ -40,6 +45,22 @@ public class UserServiceImpl implements UserService {
                 user.getDepartment());
     }
 
+    private AttachmentDto convertToAttachmentDto(Attachment attachment) {
+        return new AttachmentDto(
+                attachment.getId(),
+                attachment.getFileName(),
+                attachment.getFileType(),
+                attachment.getStoredPath(),
+                attachment.getReviewMeeting() != null
+                        ? attachment.getReviewMeeting().getId()
+                        : null,
+                attachment.getTestRecord() != null ? attachment.getTestRecord().getId() : null,
+                attachment.getUser() != null ? attachment.getUser().getId() : null,
+                attachment.getUploadedBy().getId(),
+                attachment.getUploadedBy().getDisplayName(),
+                attachment.getUploadedAt());
+    }
+
     @Override
     public List<UserDto> getUserAll() {
         return userRepository.findAll().stream().map(this::convertToDto).collect(Collectors.toList());
@@ -49,13 +70,16 @@ public class UserServiceImpl implements UserService {
     public UserDetailResponse getUserById(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
 
+        List<Attachment> attachments = attachmentRepository.findByUserId(user.getId());
+
         return new UserDetailResponse(
                 user.getId(),
                 user.getUsername(),
                 user.getDisplayName(),
                 user.getRole(),
                 user.getCreatedAt(),
-                user.getDepartment());
+                user.getDepartment(),
+                attachments.stream().map(this::convertToAttachmentDto).collect(Collectors.toList()));
     }
 
     @Override

@@ -17,6 +17,7 @@ import com.example.vehicleverification.domain.entity.Model;
 import com.example.vehicleverification.domain.entity.ReviewMeeting;
 import com.example.vehicleverification.domain.entity.User;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
+import com.example.vehicleverification.domain.repository.AttachmentRepository;
 import com.example.vehicleverification.domain.repository.ModelRepository;
 import com.example.vehicleverification.domain.repository.ReviewMeetingRepository;
 import com.example.vehicleverification.domain.repository.UserRepository;
@@ -39,6 +40,9 @@ class ReviewMeetingServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private AttachmentRepository attachmentRepository;
 
     @InjectMocks
     private ReviewMeetingServiceImpl reviewMeetingService;

@@ -1,6 +1,8 @@
 package com.example.vehicleverification.application.dto.testrecord;
 
+import com.example.vehicleverification.application.dto.attachment.AttachmentDto;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,4 +22,5 @@ public class TestRecordDetailResponse {
     private String recordedByName;
     private LocalDateTime recordedAt;
     private Long version;
+    private List<AttachmentDto> attachments;
 }

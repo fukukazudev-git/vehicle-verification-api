@@ -1,15 +1,18 @@
 package com.example.vehicleverification.application.service;
 
+import com.example.vehicleverification.application.dto.attachment.AttachmentDto;
 import com.example.vehicleverification.application.dto.testrecord.TestRecordCreateRequest;
 import com.example.vehicleverification.application.dto.testrecord.TestRecordCreateResponse;
 import com.example.vehicleverification.application.dto.testrecord.TestRecordDetailResponse;
 import com.example.vehicleverification.application.dto.testrecord.TestRecordDto;
 import com.example.vehicleverification.application.dto.testrecord.TestRecordUpdateRequest;
 import com.example.vehicleverification.application.dto.testrecord.TestRecordUpdateResponse;
+import com.example.vehicleverification.domain.entity.Attachment;
 import com.example.vehicleverification.domain.entity.ReviewMeeting;
 import com.example.vehicleverification.domain.entity.TestRecord;
 import com.example.vehicleverification.domain.entity.User;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
+import com.example.vehicleverification.domain.repository.AttachmentRepository;
 import com.example.vehicleverification.domain.repository.ReviewMeetingRepository;
 import com.example.vehicleverification.domain.repository.TestRecordRepository;
 import com.example.vehicleverification.domain.repository.UserRepository;
@@ -26,14 +29,17 @@ public class TestRecordServiceImpl implements TestRecordService {
     private final TestRecordRepository testRecordRepository;
     private final ReviewMeetingRepository reviewMeetingRepository;
     private final UserRepository userRepository;
+    private final AttachmentRepository attachmentRepository;
 
     public TestRecordServiceImpl(
             TestRecordRepository testRecordRepository,
             ReviewMeetingRepository reviewMeetingRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            AttachmentRepository attachmentRepository) {
         this.testRecordRepository = testRecordRepository;
         this.reviewMeetingRepository = reviewMeetingRepository;
         this.userRepository = userRepository;
+        this.attachmentRepository = attachmentRepository;
     }
 
     private TestRecordDto convertToDto(TestRecord testRecord) {
@@ -46,6 +52,22 @@ public class TestRecordServiceImpl implements TestRecordService {
                 testRecord.getRecordedBy().getId(),
                 testRecord.getRecordedBy().getDisplayName(),
                 testRecord.getRecordedAt());
+    }
+
+    private AttachmentDto convertToAttachmentDto(Attachment attachment) {
+        return new AttachmentDto(
+                attachment.getId(),
+                attachment.getFileName(),
+                attachment.getFileType(),
+                attachment.getStoredPath(),
+                attachment.getReviewMeeting() != null
+                        ? attachment.getReviewMeeting().getId()
+                        : null,
+                attachment.getTestRecord() != null ? attachment.getTestRecord().getId() : null,
+                attachment.getUser() != null ? attachment.getUser().getId() : null,
+                attachment.getUploadedBy().getId(),
+                attachment.getUploadedBy().getDisplayName(),
+                attachment.getUploadedAt());
     }
 
     @Override
@@ -73,6 +95,8 @@ public class TestRecordServiceImpl implements TestRecordService {
     public TestRecordDetailResponse getTestRecordById(Long id) {
         TestRecord testRecord = testRecordRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
 
+        List<Attachment> attachments = attachmentRepository.findByTestRecordId(testRecord.getId());
+
         return new TestRecordDetailResponse(
                 testRecord.getId(),
                 testRecord.getTestName(),
@@ -83,7 +107,8 @@ public class TestRecordServiceImpl implements TestRecordService {
                 testRecord.getRecordedBy().getId(),
                 testRecord.getRecordedBy().getDisplayName(),
                 testRecord.getRecordedAt(),
-                testRecord.getVersion());
+                testRecord.getVersion(),
+                attachments.stream().map(this::convertToAttachmentDto).collect(Collectors.toList()));
     }
 
     @Override
