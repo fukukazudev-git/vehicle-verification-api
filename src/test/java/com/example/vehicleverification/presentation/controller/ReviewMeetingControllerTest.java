@@ -75,7 +75,7 @@ public class ReviewMeetingControllerTest {
     private CustomUserDetailsService customUserDetailsService;
 
     @Test
-    void POST_createReviewMeeting_正常系_200を返す() throws Exception {
+    void POST_createReviewMeeting_正常系_201を返す() throws Exception {
         // Arrange
         ReviewMeetingCreateRequest request = new ReviewMeetingCreateRequest();
         LocalDate scheduledDate = LocalDate.of(2026, 1, 1);
@@ -96,7 +96,7 @@ public class ReviewMeetingControllerTest {
         mockMvc.perform(post("/api/review-meetings")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(response.getId()))
                 // レスポンス側の検証: Serviceの戻り値(response)が正しくJSONにシリアライズされているか
                 .andExpect(jsonPath("$.title").value(response.getTitle()));
