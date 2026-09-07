@@ -2,6 +2,7 @@ package com.example.vehicleverification.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.vehicleverification.infrastructure.config.StorageProperties;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,7 +11,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.util.ReflectionTestUtils;
 
 class LocalStorageServiceTest {
 
@@ -22,9 +22,10 @@ class LocalStorageServiceTest {
 
     @BeforeEach
     void setUp() {
-        localStorageService = new LocalStorageService();
-        // Springコンテキストを立てずに注入
-        ReflectionTestUtils.setField(localStorageService, "storagePath", tempDir.toString());
+        // Springコンテキストを立てずに、保存先だけ一時ディレクトリに設定して注入
+        StorageProperties properties = new StorageProperties();
+        properties.getLocal().setPath(tempDir.toString());
+        localStorageService = new LocalStorageService(properties);
     }
 
     @Test
