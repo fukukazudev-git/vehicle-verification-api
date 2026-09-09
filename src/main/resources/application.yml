@@ -34,3 +34,9 @@ storage:
   s3:
     bucket: ${S3_BUCKET_NAME:vehicle-verification-attachments}
     region: ${S3_REGION:ap-northeast-1}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
