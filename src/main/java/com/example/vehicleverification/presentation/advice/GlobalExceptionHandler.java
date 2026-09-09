@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 // ResponseEntityExceptionHandlerを継承することで、Spring MVCが投げる標準例外
@@ -140,6 +141,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 null);
 
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMaxUploadSizeExceededException(
+            MaxUploadSizeExceededException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+
+        ErrorResponse body = new ErrorResponse(
+                HttpStatus.CONTENT_TOO_LARGE.value(),
+                HttpStatus.CONTENT_TOO_LARGE.getReasonPhrase(),
+                "ファイルサイズが上限(100MB)を超えています。",
+                resolvePath(request),
+                null);
+
+        return new ResponseEntity<>(body, HttpStatus.CONTENT_TOO_LARGE);
     }
 
     // バリデーションの例外処理ハンドラ

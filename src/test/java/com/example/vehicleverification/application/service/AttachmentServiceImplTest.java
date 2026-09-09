@@ -111,7 +111,7 @@ class AttachmentServiceImplTest {
     void upload_ファイルサイズが上限を超える場合_IllegalArgumentExceptionを投げる() {
         MultipartFile file = mock(MultipartFile.class);
         given(file.getOriginalFilename()).willReturn("big.pdf");
-        given(file.getSize()).willReturn(10L * 1024 * 1024 + 1);
+        given(file.getSize()).willReturn(100L * 1024 * 1024 + 1);
 
         assertThatThrownBy(() -> attachmentService.upload(request(1L, null, null), file, UPLOADER_ID))
                 .isInstanceOf(IllegalArgumentException.class)
