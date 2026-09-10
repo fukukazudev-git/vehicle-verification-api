@@ -72,8 +72,8 @@ public class AttachmentServiceImpl implements AttachmentService {
         }
 
         // サイズチェック
-        if (file.getSize() > 10 * 1024 * 1024) {
-            throw new IllegalArgumentException("ファイルサイズが上限(10MB)を超えています: " + file.getSize());
+        if (file.getSize() > 100 * 1024 * 1024) {
+            throw new IllegalArgumentException("ファイルサイズが上限(100MB)を超えています: " + file.getSize());
         }
 
         // 紐づけ先の存在チェック

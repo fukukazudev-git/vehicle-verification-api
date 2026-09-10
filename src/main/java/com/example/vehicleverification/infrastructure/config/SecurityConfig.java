@@ -64,7 +64,13 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // 認証情報はAuthorizationヘッダーで明示送信&ステートレスであるためCSRF対策無効化
                 .sessionManagement(s ->
                         s.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // JWT認証のため認証状態はサーバに保持せず、JWTで自己申告させる
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**")
+                .authorizeHttpRequests(auth -> auth.requestMatchers("/swagger-ui.html")
+                        .permitAll()
+                        .requestMatchers("/swagger-ui/**")
+                        .permitAll()
+                        .requestMatchers("/v3/api-docs/**")
+                        .permitAll()
+                        .requestMatchers("/api/auth/**")
                         .permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users")
                         .hasRole("ADMIN") // ユーザ登録は管理者のみ許可
