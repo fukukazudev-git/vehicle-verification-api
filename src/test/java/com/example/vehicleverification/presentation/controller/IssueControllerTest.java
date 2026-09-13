@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.vehicleverification.application.dto.issue.IssueUpdateRequest;
 import com.example.vehicleverification.application.dto.issue.IssueUpdateResponse;
 import com.example.vehicleverification.application.service.IssueService;
+import com.example.vehicleverification.domain.entity.IssueStatus;
 import com.example.vehicleverification.infrastructure.config.SecurityConfig;
 import com.example.vehicleverification.infrastructure.security.CustomUserDetailsService;
 import com.example.vehicleverification.infrastructure.security.JwtAccessDeniedHandler;
@@ -78,12 +79,12 @@ public class IssueControllerTest {
         request.setAnswer("更新された回答");
         request.setAnswererId(1L);
         request.setResolvedAt(resolvedAt);
-        request.setStatus("完了");
+        request.setStatus(IssueStatus.RESOLVED);
         request.setVersion(0L);
 
         IssueUpdateResponse response = new IssueUpdateResponse(
                 1L,
-                "完了",
+                IssueStatus.RESOLVED,
                 "更新された内容",
                 "更新された回答",
                 resolvedAt,
@@ -105,7 +106,7 @@ public class IssueControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(response.getId()))
-                .andExpect(jsonPath("$.status").value(response.getStatus()));
+                .andExpect(jsonPath("$.status").value(response.getStatus().name()));
 
         // Assert
         ArgumentCaptor<IssueUpdateRequest> captor = ArgumentCaptor.forClass(IssueUpdateRequest.class);
@@ -124,7 +125,7 @@ public class IssueControllerTest {
         request.setAnswer("更新された回答");
         request.setAnswererId(1L);
         request.setResolvedAt(LocalDate.of(2026, 1, 1));
-        request.setStatus("完了");
+        request.setStatus(IssueStatus.RESOLVED);
         // versionを設定しない
 
         mockMvc.perform(patch("/api/issues/{id}", 1L)

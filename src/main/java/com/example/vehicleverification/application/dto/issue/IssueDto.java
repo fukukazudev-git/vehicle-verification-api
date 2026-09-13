@@ -1,5 +1,6 @@
 package com.example.vehicleverification.application.dto.issue;
 
+import com.example.vehicleverification.domain.entity.IssueStatus;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class IssueDto {
     private Long id;
-    private String status;
+    private IssueStatus status;
     private String content;
     private Long reviewMeetingId;
     private String reviewMeetingTitle;

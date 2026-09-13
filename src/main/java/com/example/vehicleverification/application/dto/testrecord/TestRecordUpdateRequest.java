@@ -1,5 +1,6 @@
 package com.example.vehicleverification.application.dto.testrecord;
 
+import com.example.vehicleverification.domain.entity.TestResult;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -14,9 +15,8 @@ public class TestRecordUpdateRequest {
     @Size(max = 100)
     private String testName;
 
-    @NotBlank(message = "結果は必須です")
-    @Size(max = 20)
-    private String result;
+    @NotNull(message = "結果は必須です")
+    private TestResult result;
 
     private String notes;
 

@@ -14,6 +14,7 @@ import com.example.vehicleverification.application.dto.issue.IssueDto;
 import com.example.vehicleverification.application.dto.issue.IssueUpdateRequest;
 import com.example.vehicleverification.application.dto.issue.IssueUpdateResponse;
 import com.example.vehicleverification.domain.entity.Issue;
+import com.example.vehicleverification.domain.entity.IssueStatus;
 import com.example.vehicleverification.domain.entity.Model;
 import com.example.vehicleverification.domain.entity.ReviewMeeting;
 import com.example.vehicleverification.domain.entity.User;
@@ -46,7 +47,7 @@ public class IssueServiceImplTest {
     @InjectMocks
     private IssueServiceImpl issueService;
 
-    private Issue createDummyIssue(Long id, String status, String answer, Long version) {
+    private Issue createDummyIssue(Long id, IssueStatus status, String answer, Long version) {
         Model model = new Model("MC0" + id, "モデル" + id, 2026, "テストECU", "エンジン", "AMD", "詳細", "仕向け地", "HEV");
         model.setId(id);
 
@@ -72,7 +73,7 @@ public class IssueServiceImplTest {
 
     @Test
     void getIssueById_存在するIDを指定した場合_DetailResponseを返す() {
-        Issue issue = createDummyIssue(1L, "未対応", "初期回答", 0L);
+        Issue issue = createDummyIssue(1L, IssueStatus.PENDING_APPROVAL, "初期回答", 0L);
         given(issueRepository.findById(issue.getId())).willReturn(Optional.of(issue));
 
         IssueDetailResponse response = issueService.getIssueById(issue.getId());
@@ -98,8 +99,8 @@ public class IssueServiceImplTest {
 
     @Test
     void getIssueAll_reviewMeetingIdとstatusが両方nullの場合_全件返す() {
-        Issue issue1 = createDummyIssue(1L, "未対応", "初期回答", 0L);
-        Issue issue2 = createDummyIssue(2L, "対応中", "回答中", 0L);
+        Issue issue1 = createDummyIssue(1L, IssueStatus.PENDING_APPROVAL, "初期回答", 0L);
+        Issue issue2 = createDummyIssue(2L, IssueStatus.IN_PROGRESS, "回答中", 0L);
         given(issueRepository.findAll()).willReturn(List.of(issue1, issue2));
 
         List<IssueDto> issues = issueService.getIssueAll(null, null);
@@ -111,7 +112,7 @@ public class IssueServiceImplTest {
     @Test
     void createIssue_正常系_CreateResponseを返す() {
         // Arrange
-        Issue issue = createDummyIssue(1L, null, null, 0L);
+        Issue issue = createDummyIssue(1L, IssueStatus.PENDING_APPROVAL, null, 0L);
         ReviewMeeting reviewMeeting = issue.getReviewMeeting();
         User reporter = issue.getReporter();
 
@@ -137,7 +138,7 @@ public class IssueServiceImplTest {
 
     @Test
     void createIssue_status未指定でも初期値未対応で保存される() {
-        Issue issue = createDummyIssue(1L, null, null, 0L);
+        Issue issue = createDummyIssue(1L, IssueStatus.PENDING_APPROVAL, null, 0L);
         ReviewMeeting reviewMeeting = issue.getReviewMeeting();
         User reporter = issue.getReporter();
 
@@ -155,7 +156,7 @@ public class IssueServiceImplTest {
         // saveに渡るIssueのstatusが、DBのNOT NULLを満たす初期値"未対応"になっていること
         ArgumentCaptor<Issue> captor = ArgumentCaptor.forClass(Issue.class);
         verify(issueRepository).save(captor.capture());
-        assertThat(captor.getValue().getStatus()).isEqualTo("未対応");
+        assertThat(captor.getValue().getStatus()).isEqualTo(IssueStatus.UNRESOLVED);
     }
 
     @Test
@@ -176,11 +177,11 @@ public class IssueServiceImplTest {
     void updateIssue_送られた項目のみ更新し未指定項目は据え置く() {
         // Arrange
         // 初期状態
-        Issue issue = createDummyIssue(1L, "未対応", "初期回答", 0L);
+        Issue issue = createDummyIssue(1L, IssueStatus.PENDING_APPROVAL, "初期回答", 0L);
 
         // statusのみ更新
         IssueUpdateRequest request = new IssueUpdateRequest();
-        request.setStatus("完了");
+        request.setStatus(IssueStatus.RESOLVED);
         request.setVersion(0L);
 
         given(issueRepository.findById(issue.getId())).willReturn(Optional.of(issue));
@@ -190,7 +191,7 @@ public class IssueServiceImplTest {
         IssueUpdateResponse response = issueService.updateIssue(issue.getId(), request);
 
         // Assert
-        assertThat(response.getStatus()).isEqualTo("完了");
+        assertThat(response.getStatus()).isEqualTo(IssueStatus.RESOLVED);
         assertThat(response.getAnswer()).isEqualTo("初期回答");
         assertThat(response.getResolvedAt()).isNull();
     }
@@ -198,13 +199,13 @@ public class IssueServiceImplTest {
     @Test
     void updateIssue_answerIdを指定した場合_answererがセットされる() {
         // Arrange
-        Issue issue = createDummyIssue(1L, "未対応", "初期回答", 0L);
+        Issue issue = createDummyIssue(1L, IssueStatus.PENDING_APPROVAL, "初期回答", 0L);
         User answerer = createDummyUser(2L, "回答者");
 
         IssueUpdateRequest request = new IssueUpdateRequest();
         request.setAnswer("更新回答");
         request.setAnswererId(answerer.getId());
-        request.setStatus("完了");
+        request.setStatus(IssueStatus.RESOLVED);
         request.setVersion(0L);
 
         given(issueRepository.findById(issue.getId())).willReturn(Optional.of(issue));
@@ -223,7 +224,7 @@ public class IssueServiceImplTest {
     @Test
     void updateIssue_存在しないanswererIdを指定した場合_例外をスローする() {
         // Arrange
-        Issue issue = createDummyIssue(1L, "未対応", "初期回答", 0L);
+        Issue issue = createDummyIssue(1L, IssueStatus.PENDING_APPROVAL, "初期回答", 0L);
         Long nonExistentAnswererId = 999L;
 
         IssueUpdateRequest request = new IssueUpdateRequest();
@@ -242,10 +243,10 @@ public class IssueServiceImplTest {
     @Test
     void updateIssue_version不一致の場合_楽観ロック例外をスローする() {
         // Arrange
-        Issue issue = createDummyIssue(1L, "未対応", "初期回答", 0L);
+        Issue issue = createDummyIssue(1L, IssueStatus.PENDING_APPROVAL, "初期回答", 0L);
 
         IssueUpdateRequest request = new IssueUpdateRequest();
-        request.setStatus("完了");
+        request.setStatus(IssueStatus.RESOLVED);
         request.setVersion(1L); // 現在のバージョンと異なる値を設定
 
         given(issueRepository.findById(issue.getId())).willReturn(Optional.of(issue));
@@ -261,7 +262,7 @@ public class IssueServiceImplTest {
     void updateIssue_存在しないIDを指定した場合_例外をスローする() {
         Long nonExistentId = 999L;
         IssueUpdateRequest request = new IssueUpdateRequest();
-        request.setStatus("完了");
+        request.setStatus(IssueStatus.RESOLVED);
         request.setVersion(0L);
 
         given(issueRepository.findById(nonExistentId)).willReturn(Optional.empty());
@@ -272,7 +273,7 @@ public class IssueServiceImplTest {
 
     @Test
     void deleteIssue_存在するIDを指定した場合_正常に削除される() {
-        Issue issue = createDummyIssue(1L, "未対応", "初期回答", 0L);
+        Issue issue = createDummyIssue(1L, IssueStatus.PENDING_APPROVAL, "初期回答", 0L);
         given(issueRepository.findById(issue.getId())).willReturn(Optional.of(issue));
 
         issueService.deleteIssue(issue.getId());

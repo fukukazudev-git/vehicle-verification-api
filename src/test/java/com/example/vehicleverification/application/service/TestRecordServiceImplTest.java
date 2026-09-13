@@ -11,6 +11,7 @@ import com.example.vehicleverification.application.dto.testrecord.TestRecordDeta
 import com.example.vehicleverification.application.dto.testrecord.TestRecordUpdateRequest;
 import com.example.vehicleverification.domain.entity.ReviewMeeting;
 import com.example.vehicleverification.domain.entity.TestRecord;
+import com.example.vehicleverification.domain.entity.TestResult;
 import com.example.vehicleverification.domain.entity.User;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.domain.repository.AttachmentRepository;
@@ -44,7 +45,7 @@ class TestRecordServiceImplTest {
     @InjectMocks
     private TestRecordServiceImpl testRecordService;
 
-    private TestRecord createDummyTestRecord(Long id, String testName, String result) {
+    private TestRecord createDummyTestRecord(Long id, String testName, TestResult result) {
         ReviewMeeting reviewMeeting =
                 new ReviewMeeting(null, "レビュー会議", LocalDate.of(2026, 1, 1), "予定", null, "備考", "EVT" + id);
         reviewMeeting.setId(id);
@@ -61,7 +62,7 @@ class TestRecordServiceImplTest {
     @Test
     void getTestRecordById_存在するIDを指定した場合_DetailResponseを返す() {
 
-        TestRecord testRecord = createDummyTestRecord(1L, "テスト1", "合格");
+        TestRecord testRecord = createDummyTestRecord(1L, "テスト1", TestResult.OK);
         Long testRecordId = testRecord.getId();
         given(testRecordRepository.findById(testRecordId)).willReturn(Optional.of(testRecord));
 
@@ -88,14 +89,14 @@ class TestRecordServiceImplTest {
     @Test
     void createTestRecord_正常系_CreateResponseを返す() {
         // Arrange
-        TestRecord testRecord = createDummyTestRecord(1L, "テスト1", "合格");
+        TestRecord testRecord = createDummyTestRecord(1L, "テスト1", TestResult.OK);
         Long reviewMeetingId = testRecord.getReviewMeeting().getId();
         Long recordedById = testRecord.getRecordedBy().getId();
 
         TestRecordCreateRequest request = new TestRecordCreateRequest();
         request.setReviewMeetingId(reviewMeetingId);
         request.setTestName("テスト1");
-        request.setResult("合格");
+        request.setResult(TestResult.OK);
         request.setNotes("備考");
         request.setRecordedById(recordedById);
 
@@ -119,7 +120,7 @@ class TestRecordServiceImplTest {
         TestRecordCreateRequest request = new TestRecordCreateRequest();
         request.setReviewMeetingId(nonExistentReviewMeetingId);
         request.setTestName("テスト1");
-        request.setResult("合格");
+        request.setResult(TestResult.OK);
         request.setNotes("備考");
         request.setRecordedById(1L);
 
@@ -133,13 +134,13 @@ class TestRecordServiceImplTest {
     @Test
     void updateTestRecord_楽観的ロック違反_例外をスローする() {
         // Arrange
-        TestRecord testRecord = createDummyTestRecord(1L, "テスト1", "合格");
+        TestRecord testRecord = createDummyTestRecord(1L, "テスト1", TestResult.OK);
         testRecord.setVersion(0L);
         Long testRecordId = testRecord.getId();
 
         TestRecordUpdateRequest updateRequest = new TestRecordUpdateRequest();
         updateRequest.setTestName("テスト1更新");
-        updateRequest.setResult("不合格");
+        updateRequest.setResult(TestResult.NG);
         updateRequest.setNotes("更新備考");
         updateRequest.setVersion(1L); // 現在のバージョンと異なる値を設定
 

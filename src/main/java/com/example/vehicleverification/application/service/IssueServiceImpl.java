@@ -7,6 +7,7 @@ import com.example.vehicleverification.application.dto.issue.IssueDto;
 import com.example.vehicleverification.application.dto.issue.IssueUpdateRequest;
 import com.example.vehicleverification.application.dto.issue.IssueUpdateResponse;
 import com.example.vehicleverification.domain.entity.Issue;
+import com.example.vehicleverification.domain.entity.IssueStatus;
 import com.example.vehicleverification.domain.entity.ReviewMeeting;
 import com.example.vehicleverification.domain.entity.User;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
@@ -48,7 +49,7 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public List<IssueDto> getIssueAll(Long reviewMeetingId, String status) {
+    public List<IssueDto> getIssueAll(Long reviewMeetingId, IssueStatus status) {
         if (reviewMeetingId != null && status != null) {
             return issueRepository.findByReviewMeetingIdAndStatus(reviewMeetingId, status).stream()
                     .map(this::convertToDto)
@@ -96,7 +97,7 @@ public class IssueServiceImpl implements IssueService {
                 .findById(request.getReporterId())
                 .orElseThrow(() -> new ResourceNotFoundException(request.getReporterId()));
 
-        Issue issue = new Issue(reviewMeeting, request.getContent(), reporter, "未対応");
+        Issue issue = new Issue(reviewMeeting, request.getContent(), reporter, IssueStatus.UNRESOLVED);
 
         Issue saved = issueRepository.save(issue);
 

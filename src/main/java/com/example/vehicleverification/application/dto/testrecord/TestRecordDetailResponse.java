@@ -1,6 +1,7 @@
 package com.example.vehicleverification.application.dto.testrecord;
 
 import com.example.vehicleverification.application.dto.attachment.AttachmentDto;
+import com.example.vehicleverification.domain.entity.TestResult;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -14,7 +15,7 @@ public class TestRecordDetailResponse {
 
     private Long id;
     private String testName;
-    private String result;
+    private TestResult result;
     private String notes;
     private Long reviewMeetingId;
     private String reviewMeetingTitle;

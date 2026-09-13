@@ -10,8 +10,10 @@ import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeeti
 import com.example.vehicleverification.application.dto.summary.IssueSummaryResponse;
 import com.example.vehicleverification.application.dto.summary.TestSummaryResponse;
 import com.example.vehicleverification.domain.entity.Attachment;
+import com.example.vehicleverification.domain.entity.IssueStatus;
 import com.example.vehicleverification.domain.entity.Model;
 import com.example.vehicleverification.domain.entity.ReviewMeeting;
+import com.example.vehicleverification.domain.entity.TestResult;
 import com.example.vehicleverification.domain.entity.User;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.domain.repository.AttachmentRepository;
@@ -210,9 +212,9 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
                 .findById(reviewMeetingId)
                 .orElseThrow(() -> new ResourceNotFoundException(reviewMeetingId));
 
-        long okCount = testRecordRepository.countByReviewMeetingIdAndResult(reviewMeetingId, "OK");
-        long ngCount = testRecordRepository.countByReviewMeetingIdAndResult(reviewMeetingId, "NG");
-        long pendingCount = testRecordRepository.countByReviewMeetingIdAndResult(reviewMeetingId, "保留");
+        long okCount = testRecordRepository.countByReviewMeetingIdAndResult(reviewMeetingId, TestResult.OK);
+        long ngCount = testRecordRepository.countByReviewMeetingIdAndResult(reviewMeetingId, TestResult.NG);
+        long pendingCount = testRecordRepository.countByReviewMeetingIdAndResult(reviewMeetingId, TestResult.PENDING);
         long totalCount = okCount + ngCount + pendingCount;
         double okRate = totalCount > 0 ? Math.round((double) okCount / totalCount * 1000) / 10.0 : 0;
 
@@ -226,10 +228,12 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
                 .findById(reviewMeetingId)
                 .orElseThrow(() -> new ResourceNotFoundException(reviewMeetingId));
 
-        long unresolvedCount = issueRepository.countByReviewMeetingIdAndStatus(reviewMeetingId, "未対応");
-        long inProgressCount = issueRepository.countByReviewMeetingIdAndStatus(reviewMeetingId, "対応中");
-        long pendingApprovalCount = issueRepository.countByReviewMeetingIdAndStatus(reviewMeetingId, "承認待ち");
-        long resolvedCount = issueRepository.countByReviewMeetingIdAndStatus(reviewMeetingId, "完了");
+        long unresolvedCount = issueRepository.countByReviewMeetingIdAndStatus(reviewMeetingId, IssueStatus.UNRESOLVED);
+        long inProgressCount =
+                issueRepository.countByReviewMeetingIdAndStatus(reviewMeetingId, IssueStatus.IN_PROGRESS);
+        long pendingApprovalCount =
+                issueRepository.countByReviewMeetingIdAndStatus(reviewMeetingId, IssueStatus.PENDING_APPROVAL);
+        long resolvedCount = issueRepository.countByReviewMeetingIdAndStatus(reviewMeetingId, IssueStatus.RESOLVED);
         long totalCount = unresolvedCount + inProgressCount + pendingApprovalCount + resolvedCount;
         boolean allResolved = totalCount > 0 && resolvedCount == totalCount;
 

@@ -1,6 +1,7 @@
 package com.example.vehicleverification.domain.repository;
 
 import com.example.vehicleverification.domain.entity.Issue;
+import com.example.vehicleverification.domain.entity.IssueStatus;
 import java.util.List;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,14 +12,14 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
     List<Issue> findByReviewMeetingId(Long reviewMeetingId);
 
     @EntityGraph(attributePaths = {"reviewMeeting", "reporter", "answerer"})
-    List<Issue> findByReviewMeetingIdAndStatus(Long reviewMeetingId, String status);
+    List<Issue> findByReviewMeetingIdAndStatus(Long reviewMeetingId, IssueStatus status);
 
     @EntityGraph(attributePaths = {"reviewMeeting", "reporter", "answerer"})
-    List<Issue> findByStatus(String status);
+    List<Issue> findByStatus(IssueStatus status);
 
     @Override
     @EntityGraph(attributePaths = {"reviewMeeting", "reporter", "answerer"})
     List<Issue> findAll();
 
-    long countByReviewMeetingIdAndStatus(Long reviewMeetingId, String status);
+    long countByReviewMeetingIdAndStatus(Long reviewMeetingId, IssueStatus status);
 }
