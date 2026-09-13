@@ -19,4 +19,6 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
     @Override
     @EntityGraph(attributePaths = {"reviewMeeting", "reporter", "answerer"})
     List<Issue> findAll();
+
+    long countByReviewMeetingIdAndStatus(Long reviewMeetingId, String status);
 }

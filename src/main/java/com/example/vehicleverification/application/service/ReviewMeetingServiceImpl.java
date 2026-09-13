@@ -7,6 +7,7 @@ import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeeti
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingDto;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingUpdateRequest;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingUpdateResponse;
+import com.example.vehicleverification.application.dto.summary.IssueSummaryResponse;
 import com.example.vehicleverification.application.dto.summary.TestSummaryResponse;
 import com.example.vehicleverification.domain.entity.Attachment;
 import com.example.vehicleverification.domain.entity.Model;
@@ -14,6 +15,7 @@ import com.example.vehicleverification.domain.entity.ReviewMeeting;
 import com.example.vehicleverification.domain.entity.User;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.domain.repository.AttachmentRepository;
+import com.example.vehicleverification.domain.repository.IssueRepository;
 import com.example.vehicleverification.domain.repository.ModelRepository;
 import com.example.vehicleverification.domain.repository.ReviewMeetingRepository;
 import com.example.vehicleverification.domain.repository.TestRecordRepository;
@@ -33,18 +35,21 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
     private final UserRepository userRepository;
     private final AttachmentRepository attachmentRepository;
     private final TestRecordRepository testRecordRepository;
+    private final IssueRepository issueRepository;
 
     public ReviewMeetingServiceImpl(
             ReviewMeetingRepository reviewMeetingRepository,
             ModelRepository modelRepository,
             UserRepository userRepository,
             AttachmentRepository attachmentRepository,
-            TestRecordRepository testRecordRepository) {
+            TestRecordRepository testRecordRepository,
+            IssueRepository issueRepository) {
         this.reviewMeetingRepository = reviewMeetingRepository;
         this.modelRepository = modelRepository;
         this.userRepository = userRepository;
         this.attachmentRepository = attachmentRepository;
         this.testRecordRepository = testRecordRepository;
+        this.issueRepository = issueRepository;
     }
 
     private ReviewMeetingDto convertToDto(ReviewMeeting reviewMeeting) {
@@ -213,5 +218,29 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
 
         return new TestSummaryResponse(
                 reviewMeetingId, reviewMeeting.getTitle(), totalCount, okCount, ngCount, pendingCount, okRate);
+    }
+
+    @Override
+    public IssueSummaryResponse getIssueSummary(Long reviewMeetingId) {
+        ReviewMeeting reviewMeeting = reviewMeetingRepository
+                .findById(reviewMeetingId)
+                .orElseThrow(() -> new ResourceNotFoundException(reviewMeetingId));
+
+        long unresolvedCount = issueRepository.countByReviewMeetingIdAndStatus(reviewMeetingId, "未対応");
+        long inProgressCount = issueRepository.countByReviewMeetingIdAndStatus(reviewMeetingId, "対応中");
+        long pendingApprovalCount = issueRepository.countByReviewMeetingIdAndStatus(reviewMeetingId, "承認待ち");
+        long resolvedCount = issueRepository.countByReviewMeetingIdAndStatus(reviewMeetingId, "完了");
+        long totalCount = unresolvedCount + inProgressCount + pendingApprovalCount + resolvedCount;
+        boolean allResolved = totalCount > 0 && resolvedCount == totalCount;
+
+        return new IssueSummaryResponse(
+                reviewMeetingId,
+                reviewMeeting.getTitle(),
+                totalCount,
+                unresolvedCount,
+                inProgressCount,
+                pendingApprovalCount,
+                resolvedCount,
+                allResolved);
     }
 }
