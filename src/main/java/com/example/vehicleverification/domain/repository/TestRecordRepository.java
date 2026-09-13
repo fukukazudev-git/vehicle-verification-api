@@ -19,4 +19,6 @@ public interface TestRecordRepository extends JpaRepository<TestRecord, Long> {
     @EntityGraph(attributePaths = {"reviewMeeting", "recordedBy"})
     @Override
     List<TestRecord> findAll();
+
+    long countByReviewMeetingIdAndResult(Long reviewMeetingId, String result);
 }

@@ -7,6 +7,7 @@ import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeeti
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingDto;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingUpdateRequest;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingUpdateResponse;
+import com.example.vehicleverification.application.dto.summary.TestSummaryResponse;
 import com.example.vehicleverification.domain.entity.Attachment;
 import com.example.vehicleverification.domain.entity.Model;
 import com.example.vehicleverification.domain.entity.ReviewMeeting;
@@ -15,6 +16,7 @@ import com.example.vehicleverification.domain.exception.ResourceNotFoundExceptio
 import com.example.vehicleverification.domain.repository.AttachmentRepository;
 import com.example.vehicleverification.domain.repository.ModelRepository;
 import com.example.vehicleverification.domain.repository.ReviewMeetingRepository;
+import com.example.vehicleverification.domain.repository.TestRecordRepository;
 import com.example.vehicleverification.domain.repository.UserRepository;
 import jakarta.persistence.OptimisticLockException;
 import java.util.List;
@@ -30,16 +32,19 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
     private final ModelRepository modelRepository;
     private final UserRepository userRepository;
     private final AttachmentRepository attachmentRepository;
+    private final TestRecordRepository testRecordRepository;
 
     public ReviewMeetingServiceImpl(
             ReviewMeetingRepository reviewMeetingRepository,
             ModelRepository modelRepository,
             UserRepository userRepository,
-            AttachmentRepository attachmentRepository) {
+            AttachmentRepository attachmentRepository,
+            TestRecordRepository testRecordRepository) {
         this.reviewMeetingRepository = reviewMeetingRepository;
         this.modelRepository = modelRepository;
         this.userRepository = userRepository;
         this.attachmentRepository = attachmentRepository;
+        this.testRecordRepository = testRecordRepository;
     }
 
     private ReviewMeetingDto convertToDto(ReviewMeeting reviewMeeting) {
@@ -192,5 +197,21 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
                 reviewMeetingRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
 
         reviewMeetingRepository.delete(reviewMeeting);
+    }
+
+    @Override
+    public TestSummaryResponse getTestSummary(Long reviewMeetingId) {
+        ReviewMeeting reviewMeeting = reviewMeetingRepository
+                .findById(reviewMeetingId)
+                .orElseThrow(() -> new ResourceNotFoundException(reviewMeetingId));
+
+        long okCount = testRecordRepository.countByReviewMeetingIdAndResult(reviewMeetingId, "OK");
+        long ngCount = testRecordRepository.countByReviewMeetingIdAndResult(reviewMeetingId, "NG");
+        long pendingCount = testRecordRepository.countByReviewMeetingIdAndResult(reviewMeetingId, "保留");
+        long totalCount = okCount + ngCount + pendingCount;
+        double okRate = totalCount > 0 ? Math.round((double) okCount / totalCount * 1000) / 10.0 : 0;
+
+        return new TestSummaryResponse(
+                reviewMeetingId, reviewMeeting.getTitle(), totalCount, okCount, ngCount, pendingCount, okRate);
     }
 }

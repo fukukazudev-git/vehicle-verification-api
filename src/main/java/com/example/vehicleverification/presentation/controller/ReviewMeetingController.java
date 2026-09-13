@@ -6,6 +6,7 @@ import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeeti
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingDto;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingUpdateRequest;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingUpdateResponse;
+import com.example.vehicleverification.application.dto.summary.TestSummaryResponse;
 import com.example.vehicleverification.application.service.ReviewMeetingService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -58,5 +59,10 @@ public class ReviewMeetingController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteReviewMeeting(@PathVariable Long id) {
         reviewMeetingService.deleteReviewMeeting(id);
+    }
+
+    @GetMapping("/{id}/test-summary")
+    public TestSummaryResponse getTestSummary(@PathVariable Long id) {
+        return reviewMeetingService.getTestSummary(id);
     }
 }
