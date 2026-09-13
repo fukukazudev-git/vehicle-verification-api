@@ -6,6 +6,7 @@ import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeeti
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingDto;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingUpdateRequest;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingUpdateResponse;
+import com.example.vehicleverification.application.dto.summary.IssueSummaryResponse;
 import com.example.vehicleverification.application.dto.summary.TestSummaryResponse;
 import java.util.List;
 
@@ -22,4 +23,6 @@ public interface ReviewMeetingService {
     void deleteReviewMeeting(Long id);
 
     TestSummaryResponse getTestSummary(Long reviewMeetingId);
+
+    IssueSummaryResponse getIssueSummary(Long reviewMeetingId);
 }

@@ -6,6 +6,7 @@ import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeeti
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingDto;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingUpdateRequest;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingUpdateResponse;
+import com.example.vehicleverification.application.dto.summary.IssueSummaryResponse;
 import com.example.vehicleverification.application.dto.summary.TestSummaryResponse;
 import com.example.vehicleverification.application.service.ReviewMeetingService;
 import jakarta.validation.Valid;
@@ -64,5 +65,10 @@ public class ReviewMeetingController {
     @GetMapping("/{id}/test-summary")
     public TestSummaryResponse getTestSummary(@PathVariable Long id) {
         return reviewMeetingService.getTestSummary(id);
+    }
+
+    @GetMapping("/{id}/issue-summary")
+    public IssueSummaryResponse getIssueSummary(@PathVariable Long id) {
+        return reviewMeetingService.getIssueSummary(id);
     }
 }
