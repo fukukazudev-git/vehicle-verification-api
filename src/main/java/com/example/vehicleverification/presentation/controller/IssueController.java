@@ -7,6 +7,7 @@ import com.example.vehicleverification.application.dto.issue.IssueDto;
 import com.example.vehicleverification.application.dto.issue.IssueUpdateRequest;
 import com.example.vehicleverification.application.dto.issue.IssueUpdateResponse;
 import com.example.vehicleverification.application.service.IssueService;
+import com.example.vehicleverification.domain.entity.IssueStatus;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -32,7 +33,7 @@ public class IssueController {
 
     @GetMapping
     public List<IssueDto> getIssueAll(
-            @RequestParam(required = false) Long reviewMeetingId, @RequestParam(required = false) String status) {
+            @RequestParam(required = false) Long reviewMeetingId, @RequestParam(required = false) IssueStatus status) {
         return issueService.getIssueAll(reviewMeetingId, status);
     }
 

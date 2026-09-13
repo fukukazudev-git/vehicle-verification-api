@@ -10,6 +10,7 @@ import com.example.vehicleverification.application.dto.testrecord.TestRecordUpda
 import com.example.vehicleverification.domain.entity.Attachment;
 import com.example.vehicleverification.domain.entity.ReviewMeeting;
 import com.example.vehicleverification.domain.entity.TestRecord;
+import com.example.vehicleverification.domain.entity.TestResult;
 import com.example.vehicleverification.domain.entity.User;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.domain.repository.AttachmentRepository;
@@ -71,7 +72,7 @@ public class TestRecordServiceImpl implements TestRecordService {
     }
 
     @Override
-    public List<TestRecordDto> getTestRecordsByReviewMeeting(Long reviewMeetingId, String result) {
+    public List<TestRecordDto> getTestRecordsByReviewMeeting(Long reviewMeetingId, TestResult result) {
         if (reviewMeetingId != null && result != null) {
             return testRecordRepository.findByReviewMeetingIdAndResult(reviewMeetingId, result).stream()
                     .map(this::convertToDto)

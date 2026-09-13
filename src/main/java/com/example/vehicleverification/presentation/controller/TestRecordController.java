@@ -7,6 +7,7 @@ import com.example.vehicleverification.application.dto.testrecord.TestRecordDto;
 import com.example.vehicleverification.application.dto.testrecord.TestRecordUpdateRequest;
 import com.example.vehicleverification.application.dto.testrecord.TestRecordUpdateResponse;
 import com.example.vehicleverification.application.service.TestRecordService;
+import com.example.vehicleverification.domain.entity.TestResult;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -33,7 +34,7 @@ public class TestRecordController {
 
     @GetMapping
     public List<TestRecordDto> getTestRecordsByReviewMeeting(
-            @RequestParam(required = false) Long reviewMeetingId, @RequestParam(required = false) String result) {
+            @RequestParam(required = false) Long reviewMeetingId, @RequestParam(required = false) TestResult result) {
         return testRecordService.getTestRecordsByReviewMeeting(reviewMeetingId, result);
     }
 

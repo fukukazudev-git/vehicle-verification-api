@@ -2,6 +2,8 @@ package com.example.vehicleverification.domain.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -35,9 +37,9 @@ public class TestRecord {
     @NotNull
     private String testName;
 
-    @Size(max = 20)
     @NotNull
-    private String result;
+    @Enumerated(EnumType.STRING)
+    private TestResult result;
 
     private String notes;
 
@@ -56,7 +58,7 @@ public class TestRecord {
         // JPAの仕様上、エンティティクラスには引数なしのコンストラクタが必要
     }
 
-    public TestRecord(ReviewMeeting reviewMeeting, String testName, String result, String notes, User recordedBy) {
+    public TestRecord(ReviewMeeting reviewMeeting, String testName, TestResult result, String notes, User recordedBy) {
         this.reviewMeeting = reviewMeeting;
         this.testName = testName;
         this.result = result;

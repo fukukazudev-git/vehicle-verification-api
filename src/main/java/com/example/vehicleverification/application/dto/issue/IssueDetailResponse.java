@@ -1,5 +1,6 @@
 package com.example.vehicleverification.application.dto.issue;
 
+import com.example.vehicleverification.domain.entity.IssueStatus;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -11,7 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class IssueDetailResponse {
     private Long id;
-    private String status;
+    private IssueStatus status;
     private String content;
     private String answer;
     private LocalDate resolvedAt;

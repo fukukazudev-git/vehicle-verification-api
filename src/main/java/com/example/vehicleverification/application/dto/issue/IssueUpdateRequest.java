@@ -1,7 +1,7 @@
 package com.example.vehicleverification.application.dto.issue;
 
+import com.example.vehicleverification.domain.entity.IssueStatus;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,9 +16,8 @@ public class IssueUpdateRequest {
 
     private LocalDate resolvedAt;
 
-    // 送られた場合のみ更新するため@NotBlankは付けない。値がある場合の長さのみEntityに合わせて検証
-    @Size(max = 20)
-    private String status;
+    // 送られた場合のみ更新（null許容）。値の妥当性はEnum型で担保される
+    private IssueStatus status;
 
     @NotNull
     private Long version;
