@@ -4,6 +4,7 @@ import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeeti
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingCreateResponse;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingDetailResponse;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingDto;
+import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingStatusResponse;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingUpdateRequest;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingUpdateResponse;
 import com.example.vehicleverification.application.dto.summary.IssueSummaryResponse;
@@ -14,6 +15,8 @@ import java.util.List;
 public interface ReviewMeetingService {
 
     List<ReviewMeetingDto> getReviewMeetingAll(Long modelId, ReviewMeetingStatus status);
+
+    List<ReviewMeetingStatusResponse> getReviewMeetingStatuses();
 
     ReviewMeetingDetailResponse getReviewMeetingById(Long id);
 

@@ -5,6 +5,7 @@ import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeeti
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingCreateResponse;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingDetailResponse;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingDto;
+import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingStatusResponse;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingUpdateRequest;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingUpdateResponse;
 import com.example.vehicleverification.application.dto.summary.IssueSummaryResponse;
@@ -24,6 +25,7 @@ import com.example.vehicleverification.domain.repository.ReviewMeetingRepository
 import com.example.vehicleverification.domain.repository.TestRecordRepository;
 import com.example.vehicleverification.domain.repository.UserRepository;
 import jakarta.persistence.OptimisticLockException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
@@ -84,6 +86,15 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
                 attachment.getUploadedBy().getId(),
                 attachment.getUploadedBy().getDisplayName(),
                 attachment.getUploadedAt());
+    }
+
+    // 検証会ステータスの全語彙(enum名 + 日本語表示名)を返す。
+    // enum を単一の情報源とし、クライアント側での語彙の二重管理を避けるためのマスタAPI。
+    @Override
+    public List<ReviewMeetingStatusResponse> getReviewMeetingStatuses() {
+        return Arrays.stream(ReviewMeetingStatus.values())
+                .map(status -> new ReviewMeetingStatusResponse(status.name(), status.getDisplayName()))
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.example.vehicleverification.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
@@ -12,6 +13,7 @@ import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeeti
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingCreateResponse;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingDetailResponse;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingDto;
+import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingStatusResponse;
 import com.example.vehicleverification.domain.entity.Model;
 import com.example.vehicleverification.domain.entity.ReviewMeeting;
 import com.example.vehicleverification.domain.entity.ReviewMeetingStatus;
@@ -62,6 +64,19 @@ class ReviewMeetingServiceImplTest {
         reviewMeeting.setId(id);
 
         return reviewMeeting;
+    }
+
+    @Test
+    void getReviewMeetingStatuses_全ステータスをcodeと日本語表示名で返す() {
+        List<ReviewMeetingStatusResponse> result = reviewMeetingService.getReviewMeetingStatuses();
+
+        assertThat(result)
+                .extracting(ReviewMeetingStatusResponse::getCode, ReviewMeetingStatusResponse::getDisplayName)
+                .containsExactly(
+                        tuple("BEFORE_VERIFICATION", "検証前"),
+                        tuple("IN_VERIFICATION", "検証中"),
+                        tuple("COMPLETED", "完了"),
+                        tuple("CANCELLED", "中断"));
     }
 
     @Test
