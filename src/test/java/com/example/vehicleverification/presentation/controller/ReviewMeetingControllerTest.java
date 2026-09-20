@@ -15,6 +15,7 @@ import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeeti
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingCreateResponse;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingDetailResponse;
 import com.example.vehicleverification.application.service.ReviewMeetingService;
+import com.example.vehicleverification.domain.entity.ReviewMeetingStatus;
 import com.example.vehicleverification.infrastructure.config.SecurityConfig;
 import com.example.vehicleverification.infrastructure.security.CustomUserDetailsService;
 import com.example.vehicleverification.infrastructure.security.JwtAccessDeniedHandler;
@@ -82,12 +83,21 @@ public class ReviewMeetingControllerTest {
         request.setModelId(1L);
         request.setTitle("定例レビュー");
         request.setScheduledDate(scheduledDate);
-        request.setStatus("予定");
+        request.setStatus(ReviewMeetingStatus.BEFORE_VERIFICATION);
         request.setOrganizerId(1L);
         request.setEventCode("EVT001");
 
         ReviewMeetingCreateResponse response = new ReviewMeetingCreateResponse(
-                1L, "定例レビュー", scheduledDate, "予定", 1L, "モデル名", 1L, "主催者名", LocalDateTime.now(), "EVT001");
+                1L,
+                "定例レビュー",
+                scheduledDate,
+                ReviewMeetingStatus.BEFORE_VERIFICATION,
+                1L,
+                "モデル名",
+                1L,
+                "主催者名",
+                LocalDateTime.now(),
+                "EVT001");
 
         given(reviewMeetingService.createReviewMeeting(any(ReviewMeetingCreateRequest.class)))
                 .willReturn(response);
@@ -118,7 +128,7 @@ public class ReviewMeetingControllerTest {
         request.setModelId(1L);
         request.setTitle(""); // @NotBlank違反
         request.setScheduledDate(LocalDate.of(2026, 1, 1));
-        request.setStatus("予定");
+        request.setStatus(ReviewMeetingStatus.BEFORE_VERIFICATION);
         request.setOrganizerId(1L);
         request.setEventCode("EVT001");
 
@@ -136,7 +146,7 @@ public class ReviewMeetingControllerTest {
                 1L,
                 "定例レビュー",
                 LocalDate.of(2026, 1, 1),
-                "予定",
+                ReviewMeetingStatus.BEFORE_VERIFICATION,
                 "備考",
                 1L,
                 "モデル名",
