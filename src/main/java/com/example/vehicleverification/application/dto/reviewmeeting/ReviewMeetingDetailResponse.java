@@ -18,6 +18,7 @@ public class ReviewMeetingDetailResponse {
     private String title;
     private LocalDate scheduledDate;
     private ReviewMeetingStatus status;
+    private String statusDisplayName;
     private String notes;
     private Long modelId;
     private String modelName;

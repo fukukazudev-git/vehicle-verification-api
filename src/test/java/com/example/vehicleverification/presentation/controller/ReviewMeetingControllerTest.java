@@ -147,6 +147,7 @@ public class ReviewMeetingControllerTest {
                 "定例レビュー",
                 LocalDate.of(2026, 1, 1),
                 ReviewMeetingStatus.BEFORE_VERIFICATION,
+                "検証前",
                 "備考",
                 1L,
                 "モデル名",
