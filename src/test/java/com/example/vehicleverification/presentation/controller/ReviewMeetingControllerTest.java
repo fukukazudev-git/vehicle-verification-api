@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingCreateRequest;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingCreateResponse;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingDetailResponse;
+import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingStatusResponse;
 import com.example.vehicleverification.application.service.ReviewMeetingService;
 import com.example.vehicleverification.domain.entity.ReviewMeetingStatus;
 import com.example.vehicleverification.infrastructure.config.SecurityConfig;
@@ -23,6 +24,7 @@ import com.example.vehicleverification.infrastructure.security.JwtAuthentication
 import com.example.vehicleverification.infrastructure.security.JwtTokenProvider;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -164,6 +166,24 @@ public class ReviewMeetingControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(response.getId()))
                 .andExpect(jsonPath("$.title").value(response.getTitle()));
+    }
+
+    @Test
+    void GET_getReviewMeetingStatuses_全ステータスをcodeと表示名で返す() throws Exception {
+        given(reviewMeetingService.getReviewMeetingStatuses())
+                .willReturn(List.of(
+                        new ReviewMeetingStatusResponse("BEFORE_VERIFICATION", "検証前"),
+                        new ReviewMeetingStatusResponse("IN_VERIFICATION", "検証中"),
+                        new ReviewMeetingStatusResponse("COMPLETED", "完了"),
+                        new ReviewMeetingStatusResponse("CANCELLED", "中断")));
+
+        mockMvc.perform(get("/api/review-meetings/statuses"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(4))
+                .andExpect(jsonPath("$[0].code").value("BEFORE_VERIFICATION"))
+                .andExpect(jsonPath("$[0].displayName").value("検証前"))
+                .andExpect(jsonPath("$[3].code").value("CANCELLED"))
+                .andExpect(jsonPath("$[3].displayName").value("中断"));
     }
 
     @Test

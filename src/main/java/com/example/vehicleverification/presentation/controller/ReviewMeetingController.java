@@ -4,6 +4,7 @@ import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeeti
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingCreateResponse;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingDetailResponse;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingDto;
+import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingStatusResponse;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingUpdateRequest;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingUpdateResponse;
 import com.example.vehicleverification.application.dto.summary.IssueSummaryResponse;
@@ -38,6 +39,12 @@ public class ReviewMeetingController {
     public List<ReviewMeetingDto> getReviewMeetingAll(
             @RequestParam(required = false) Long modelId, @RequestParam(required = false) ReviewMeetingStatus status) {
         return reviewMeetingService.getReviewMeetingAll(modelId, status);
+    }
+
+    // ステータスの全語彙(code + 日本語表示名)を返すマスタAPI。/{id} より前に定義し、リテラルパスを優先させる
+    @GetMapping("/statuses")
+    public List<ReviewMeetingStatusResponse> getReviewMeetingStatuses() {
+        return reviewMeetingService.getReviewMeetingStatuses();
     }
 
     @GetMapping("/{id}")
