@@ -16,6 +16,7 @@ public class ReviewMeetingDto {
     private String title;
     private LocalDate scheduledDate;
     private ReviewMeetingStatus status;
+    private String statusDisplayName;
     private Long modelId;
     private String modelName;
     private Long organizerId;
