@@ -10,6 +10,7 @@ import com.example.vehicleverification.application.dto.testrecord.TestRecordCrea
 import com.example.vehicleverification.application.dto.testrecord.TestRecordDetailResponse;
 import com.example.vehicleverification.application.dto.testrecord.TestRecordUpdateRequest;
 import com.example.vehicleverification.domain.entity.ReviewMeeting;
+import com.example.vehicleverification.domain.entity.ReviewMeetingStatus;
 import com.example.vehicleverification.domain.entity.TestRecord;
 import com.example.vehicleverification.domain.entity.TestResult;
 import com.example.vehicleverification.domain.entity.User;
@@ -46,8 +47,14 @@ class TestRecordServiceImplTest {
     private TestRecordServiceImpl testRecordService;
 
     private TestRecord createDummyTestRecord(Long id, String testName, TestResult result) {
-        ReviewMeeting reviewMeeting =
-                new ReviewMeeting(null, "レビュー会議", LocalDate.of(2026, 1, 1), "予定", null, "備考", "EVT" + id);
+        ReviewMeeting reviewMeeting = new ReviewMeeting(
+                null,
+                "レビュー会議",
+                LocalDate.of(2026, 1, 1),
+                ReviewMeetingStatus.BEFORE_VERIFICATION,
+                null,
+                "備考",
+                "EVT" + id);
         reviewMeeting.setId(id);
 
         User recordedBy = new User("testuser" + id, "pass", "記録者" + id, "ADMIN", "開発部");

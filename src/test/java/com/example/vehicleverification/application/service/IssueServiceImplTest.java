@@ -17,6 +17,7 @@ import com.example.vehicleverification.domain.entity.Issue;
 import com.example.vehicleverification.domain.entity.IssueStatus;
 import com.example.vehicleverification.domain.entity.Model;
 import com.example.vehicleverification.domain.entity.ReviewMeeting;
+import com.example.vehicleverification.domain.entity.ReviewMeetingStatus;
 import com.example.vehicleverification.domain.entity.User;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.domain.repository.IssueRepository;
@@ -54,8 +55,14 @@ public class IssueServiceImplTest {
         User reporter = new User("reporter" + id, "pass" + id, "報告者" + id, "USER", "開発部");
         reporter.setId(id);
 
-        ReviewMeeting reviewMeeting =
-                new ReviewMeeting(model, "定例レビュー" + id, LocalDate.of(2026, 1, 1), "予定", reporter, "備考", "EVT" + id);
+        ReviewMeeting reviewMeeting = new ReviewMeeting(
+                model,
+                "定例レビュー" + id,
+                LocalDate.of(2026, 1, 1),
+                ReviewMeetingStatus.BEFORE_VERIFICATION,
+                reporter,
+                "備考",
+                "EVT" + id);
         reviewMeeting.setId(id);
 
         Issue issue = new Issue(reviewMeeting, "指摘内容" + id, reporter, status);

@@ -1,5 +1,6 @@
 package com.example.vehicleverification.application.dto.reviewmeeting;
 
+import com.example.vehicleverification.domain.entity.ReviewMeetingStatus;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,7 +14,7 @@ public class ReviewMeetingUpdateResponse {
     private Long id;
     private String title;
     private LocalDate scheduledDate;
-    private String status;
+    private ReviewMeetingStatus status;
     private String notes;
     private Long modelId;
     private String modelName;

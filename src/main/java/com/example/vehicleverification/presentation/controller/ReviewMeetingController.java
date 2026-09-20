@@ -9,6 +9,7 @@ import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeeti
 import com.example.vehicleverification.application.dto.summary.IssueSummaryResponse;
 import com.example.vehicleverification.application.dto.summary.TestSummaryResponse;
 import com.example.vehicleverification.application.service.ReviewMeetingService;
+import com.example.vehicleverification.domain.entity.ReviewMeetingStatus;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -35,7 +36,7 @@ public class ReviewMeetingController {
 
     @GetMapping
     public List<ReviewMeetingDto> getReviewMeetingAll(
-            @RequestParam(required = false) Long modelId, @RequestParam(required = false) String status) {
+            @RequestParam(required = false) Long modelId, @RequestParam(required = false) ReviewMeetingStatus status) {
         return reviewMeetingService.getReviewMeetingAll(modelId, status);
     }
 

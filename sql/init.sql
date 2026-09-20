@@ -1,6 +1,15 @@
 -- 注意: このinit.sqlはボリューム初回作成時のみ実行される。
 -- カラム追加後は down -v でボリュームを再作成しないとDBに反映されない。
 -- （ddl-auto: validate のため、EntityとDBのカラム定義が一致していないと起動に失敗する）
+
+-- 変更履歴:
+-- 2026-09-20 review_meetings.status のデフォルト値を
+--            '予定' → 'BEFORE_VERIFICATION' に変更（ReviewMeetingStatus Enum化対応）
+-- 2026-09-14 test_records.result のデフォルト値を
+--            '保留' → 'PENDING' に変更（TestResult Enum化対応）
+-- 2026-09-14 issues.status のデフォルト値を
+--            '未対応' → 'UNRESOLVED' に変更（IssueStatus Enum化対応）
+
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(20) NOT NULL UNIQUE,
@@ -31,7 +40,7 @@ CREATE TABLE IF NOT EXISTS review_meetings (
     model_id BIGINT NOT NULL,
     title VARCHAR(200) NOT NULL,
     scheduled_date DATE NOT NULL,
-    status VARCHAR(20) NOT NULL DEFAULT '予定',
+    status VARCHAR(20) NOT NULL DEFAULT 'BEFORE_VERIFICATION',
     organizer_id BIGINT NOT NULL,
     notes TEXT,
     event_code VARCHAR(20) NOT NULL,

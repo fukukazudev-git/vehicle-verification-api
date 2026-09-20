@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import com.example.vehicleverification.application.dto.attachment.AttachmentDto;
 import com.example.vehicleverification.application.dto.attachment.AttachmentUploadRequest;
 import com.example.vehicleverification.domain.entity.ReviewMeeting;
+import com.example.vehicleverification.domain.entity.ReviewMeetingStatus;
 import com.example.vehicleverification.domain.entity.User;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.domain.repository.AttachmentRepository;
@@ -63,8 +64,14 @@ class AttachmentServiceImplTest {
     }
 
     private ReviewMeeting dummyReviewMeeting(Long id) {
-        ReviewMeeting reviewMeeting =
-                new ReviewMeeting(null, "レビュー会議", LocalDate.of(2026, 1, 1), "予定", null, "備考", "EVT" + id);
+        ReviewMeeting reviewMeeting = new ReviewMeeting(
+                null,
+                "レビュー会議",
+                LocalDate.of(2026, 1, 1),
+                ReviewMeetingStatus.BEFORE_VERIFICATION,
+                null,
+                "備考",
+                "EVT" + id);
         reviewMeeting.setId(id);
         return reviewMeeting;
     }

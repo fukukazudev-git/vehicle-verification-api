@@ -1,6 +1,7 @@
 package com.example.vehicleverification.application.dto.reviewmeeting;
 
 import com.example.vehicleverification.application.dto.attachment.AttachmentDto;
+import com.example.vehicleverification.domain.entity.ReviewMeetingStatus;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,7 +17,7 @@ public class ReviewMeetingDetailResponse {
     private Long id;
     private String title;
     private LocalDate scheduledDate;
-    private String status;
+    private ReviewMeetingStatus status;
     private String notes;
     private Long modelId;
     private String modelName;

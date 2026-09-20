@@ -1,5 +1,6 @@
 package com.example.vehicleverification.application.dto.reviewmeeting;
 
+import com.example.vehicleverification.domain.entity.ReviewMeetingStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -21,8 +22,8 @@ public class ReviewMeetingCreateRequest {
     @NotNull
     private LocalDate scheduledDate;
 
-    @NotBlank
-    private String status;
+    @NotNull
+    private ReviewMeetingStatus status;
 
     @NotNull
     private Long organizerId;

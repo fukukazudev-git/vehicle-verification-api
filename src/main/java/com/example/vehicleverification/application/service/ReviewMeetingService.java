@@ -8,11 +8,12 @@ import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeeti
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingUpdateResponse;
 import com.example.vehicleverification.application.dto.summary.IssueSummaryResponse;
 import com.example.vehicleverification.application.dto.summary.TestSummaryResponse;
+import com.example.vehicleverification.domain.entity.ReviewMeetingStatus;
 import java.util.List;
 
 public interface ReviewMeetingService {
 
-    List<ReviewMeetingDto> getReviewMeetingAll(Long modelId, String status);
+    List<ReviewMeetingDto> getReviewMeetingAll(Long modelId, ReviewMeetingStatus status);
 
     ReviewMeetingDetailResponse getReviewMeetingById(Long id);
 

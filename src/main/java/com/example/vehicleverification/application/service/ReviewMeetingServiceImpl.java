@@ -13,6 +13,7 @@ import com.example.vehicleverification.domain.entity.Attachment;
 import com.example.vehicleverification.domain.entity.IssueStatus;
 import com.example.vehicleverification.domain.entity.Model;
 import com.example.vehicleverification.domain.entity.ReviewMeeting;
+import com.example.vehicleverification.domain.entity.ReviewMeetingStatus;
 import com.example.vehicleverification.domain.entity.TestResult;
 import com.example.vehicleverification.domain.entity.User;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
@@ -85,7 +86,7 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
     }
 
     @Override
-    public List<ReviewMeetingDto> getReviewMeetingAll(Long modelId, String status) {
+    public List<ReviewMeetingDto> getReviewMeetingAll(Long modelId, ReviewMeetingStatus status) {
 
         if (modelId != null && status != null) {
             return reviewMeetingRepository.findByModelIdAndStatus(modelId, status).stream()

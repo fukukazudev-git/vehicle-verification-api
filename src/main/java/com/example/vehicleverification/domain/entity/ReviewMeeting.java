@@ -2,6 +2,8 @@ package com.example.vehicleverification.domain.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -44,8 +46,8 @@ public class ReviewMeeting {
     private LocalDate scheduledDate;
 
     @NotNull
-    @Size(max = 20)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private ReviewMeetingStatus status;
 
     // user.getUsername()のようにオブジェクトの関連をたどるとJPA/HibernateがSQLを発行する。
     // → SELECT * FROM users WHERE id = ? のtupleがUserオブジェクトとして返される
@@ -72,7 +74,7 @@ public class ReviewMeeting {
             Model model,
             String title,
             LocalDate scheduledDate,
-            String status,
+            ReviewMeetingStatus status,
             User organizer,
             String notes,
             String eventCode) {
