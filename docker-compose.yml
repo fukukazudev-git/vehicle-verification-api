@@ -40,16 +40,24 @@ services:
     ports:
       - "8080:8080"
     environment:
+      SPRING_PROFILES_ACTIVE: local
       # localhostではなく、docker-compose.ymlのサービス名(db)を指定することで
       # コンテナ間通信が可能になる
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE:-verification_db}
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-appuser}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-apppassword}
+      JWT_SECRET: ${JWT_SECRET:-local-dev-secret-key-must-be-at-least-32-characters}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin}
+      LOCAL_STORAGE_PATH: ${LOCAL_STORAGE_PATH:-/app/uploads}
+    volumes:
+      - uploads_data:/app/uploads
     depends_on:
       db:
-      # depends_onのconditionを指定することで、依存関係のサービスが起動しているかどうかを確認する
-      # dbサービスがhealthy状態になるまで待機
+        # depends_onのconditionを指定することで、依存関係のサービスが起動しているかどうかを確認する
+        # dbサービスがhealthy状態になるまで待機
         condition: service_healthy
-
+    restart: on-failure
 volumes:
   mysql_data:
+  uploads_data:
