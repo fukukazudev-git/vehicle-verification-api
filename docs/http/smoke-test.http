@@ -1,0 +1,444 @@
+# EC2・ローカル共通のスモークテスト（VS Code 拡張「REST Client」で実行）
+#
+# 準備: このフォルダの .env.example の項目を .env（このフォルダかリポジトリ直下）に書き、BASE_URL・パスワードを入れる
+# 使い方: 上から順に「Send Request」をクリックする
+#   - 後続のリクエストは、前のレスポンス（# @name を付けたもの）から token や id を自動で取り出す
+#   - 一意な項目（機種コード・ユーザー名）は乱数で作るので、何度流してもよい
+#   - 各リクエストの「期待:」が想定するステータス。違ったらバグか仕様変更
+# 後片付け: 最後の「8. 削除」まで流すと、作ったデータは消える
+
+@baseUrl = {{$dotenv BASE_URL}}
+@token = {{loginAdmin.response.body.token}}
+@memberToken = {{loginMember.response.body.token}}
+@memberId = {{createMember.response.body.id}}
+@memberUsername = {{createMember.response.body.username}}
+@modelId = {{createModel.response.body.id}}
+@reviewMeetingId = {{createReviewMeeting.response.body.id}}
+@testRecordId = {{createTestRecord.response.body.id}}
+@issueId = {{createIssue.response.body.id}}
+@attachmentId = {{uploadAttachment.response.body.id}}
+
+########## 0. 認証 ##########
+
+### 管理者ログイン（期待: 200、token が返る）
+# @name loginAdmin
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "{{$dotenv ADMIN_USERNAME}}",
+  "password": "{{$dotenv ADMIN_PASSWORD}}"
+}
+
+### パスワード誤り（期待: 401「ユーザー名またはパスワードが正しくありません。」）
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "{{$dotenv ADMIN_USERNAME}}",
+  "password": "wrong-password"
+}
+
+### 壊れたJSON（期待: 400「リクエストの形式が不正です。」）
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "x"
+
+### トークンなし（期待: 401）
+GET {{baseUrl}}/api/models
+
+########## 1. ユーザー ##########
+
+### MEMBER ユーザー作成（期待: 201）
+# @name createMember
+POST {{baseUrl}}/api/users
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "username": "member{{$randomInt 10000 99999}}",
+  "password": "{{$dotenv MEMBER_PASSWORD}}",
+  "displayName": "スモークテスト",
+  "role": "MEMBER",
+  "department": "QA"
+}
+
+### ユーザー一覧（期待: 200）
+GET {{baseUrl}}/api/users
+Authorization: Bearer {{token}}
+
+### ユーザー詳細（期待: 200）
+GET {{baseUrl}}/api/users/{{memberId}}
+Authorization: Bearer {{token}}
+
+### ユーザー更新（期待: 200）
+PUT {{baseUrl}}/api/users/{{memberId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "displayName": "スモークテスト（更新）",
+  "role": "MEMBER",
+  "department": "QA"
+}
+
+### MEMBER でログイン（期待: 200）
+# @name loginMember
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "{{memberUsername}}",
+  "password": "{{$dotenv MEMBER_PASSWORD}}"
+}
+
+### MEMBER はユーザー登録できない（期待: 403）
+POST {{baseUrl}}/api/users
+Authorization: Bearer {{memberToken}}
+Content-Type: application/json
+
+{
+  "username": "forbidden{{$randomInt 1000 9999}}",
+  "password": "x",
+  "displayName": "x",
+  "role": "MEMBER",
+  "department": "x"
+}
+
+### MEMBER でも参照系は使える（期待: 200）
+GET {{baseUrl}}/api/models
+Authorization: Bearer {{memberToken}}
+
+########## 2. 車種 ##########
+
+### 車種作成（期待: 201）
+# @name createModel
+POST {{baseUrl}}/api/models
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "modelCode": "T{{$randomInt 100000 999999}}",
+  "modelName": "スモーク車種",
+  "modelYear": 2026,
+  "ecuType": "ECU-A",
+  "engineType": "2.0L",
+  "driveType": "FF",
+  "description": "スモークテスト",
+  "destination": "JP",
+  "powertrainType": "HEV"
+}
+
+### 車種一覧（期待: 200）
+GET {{baseUrl}}/api/models
+Authorization: Bearer {{token}}
+
+### 車種詳細（期待: 200。修正4までは version が返らない）
+GET {{baseUrl}}/api/models/{{modelId}}
+Authorization: Bearer {{token}}
+
+### 車種更新（期待: 200。作成直後なので version は 0）
+PUT {{baseUrl}}/api/models/{{modelId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "modelCode": "{{createModel.response.body.modelCode}}",
+  "modelName": "スモーク車種（更新）",
+  "modelYear": 2026,
+  "ecuType": "ECU-A",
+  "engineType": "2.0L",
+  "driveType": "FF",
+  "description": "スモークテスト（更新）",
+  "destination": "JP",
+  "powertrainType": "HEV",
+  "version": 0
+}
+
+### 古い version で更新（期待: 409「ほかのユーザーが先に更新しました。」）
+PUT {{baseUrl}}/api/models/{{modelId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "modelCode": "{{createModel.response.body.modelCode}}",
+  "modelName": "スモーク車種",
+  "modelYear": 2026,
+  "ecuType": "ECU-A",
+  "engineType": "2.0L",
+  "driveType": "FF",
+  "destination": "JP",
+  "powertrainType": "HEV",
+  "version": 0
+}
+
+### バリデーション: 機種コード11文字・機種名なし（期待: 400、fieldErrors 2件）
+POST {{baseUrl}}/api/models
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "modelCode": "ABCDEFGHIJK",
+  "modelYear": 2026,
+  "ecuType": "ECU-A",
+  "engineType": "2.0L",
+  "driveType": "FF",
+  "destination": "JP",
+  "powertrainType": "HEV"
+}
+
+### バリデーション: 年式が範囲外（期待: 400「1900以上で入力してください」）
+POST {{baseUrl}}/api/models
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "modelCode": "T000001",
+  "modelName": "範囲外",
+  "modelYear": 1800,
+  "ecuType": "ECU-A",
+  "engineType": "2.0L",
+  "driveType": "FF",
+  "destination": "JP",
+  "powertrainType": "HEV"
+}
+
+### 存在しないID（期待: 404）
+GET {{baseUrl}}/api/models/999999
+Authorization: Bearer {{token}}
+
+########## 3. 検証会 ##########
+
+### ステータス一覧（期待: 200）
+GET {{baseUrl}}/api/review-meetings/statuses
+Authorization: Bearer {{token}}
+
+### 検証会作成（期待: 201）
+# @name createReviewMeeting
+POST {{baseUrl}}/api/review-meetings
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "modelId": {{modelId}},
+  "title": "スモーク検証会",
+  "scheduledDate": "{{$datetime 'YYYY-MM-DD'}}",
+  "status": "BEFORE_VERIFICATION",
+  "organizerId": {{memberId}},
+  "eventCode": "EV-SMOKE"
+}
+
+### ステータスに日本語（期待: 400。修正2で fieldErrors に許容値が出るようになる）
+POST {{baseUrl}}/api/review-meetings
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "modelId": {{modelId}},
+  "title": "日本語ステータス",
+  "scheduledDate": "{{$datetime 'YYYY-MM-DD'}}",
+  "status": "検証前",
+  "organizerId": {{memberId}},
+  "eventCode": "EV-SMOKE"
+}
+
+### 検証会一覧（車種で絞り込み）（期待: 200）
+GET {{baseUrl}}/api/review-meetings?modelId={{modelId}}
+Authorization: Bearer {{token}}
+
+### 検証会詳細（期待: 200）
+GET {{baseUrl}}/api/review-meetings/{{reviewMeetingId}}
+Authorization: Bearer {{token}}
+
+### 検証会更新（期待: 200）
+PUT {{baseUrl}}/api/review-meetings/{{reviewMeetingId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "スモーク検証会（更新）",
+  "scheduledDate": "{{$datetime 'YYYY-MM-DD'}}",
+  "status": "IN_VERIFICATION",
+  "organizerId": {{memberId}},
+  "eventCode": "EV-SMOKE",
+  "version": 0
+}
+
+########## 4. テスト記録 ##########
+
+### テスト記録作成（期待: 201）
+# @name createTestRecord
+POST {{baseUrl}}/api/test-records
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "reviewMeetingId": {{reviewMeetingId}},
+  "testName": "起動確認",
+  "result": "PENDING",
+  "recordedById": {{memberId}}
+}
+
+### テスト記録一覧（検証会で絞り込み）（期待: 200）
+GET {{baseUrl}}/api/test-records?reviewMeetingId={{reviewMeetingId}}
+Authorization: Bearer {{token}}
+
+### テスト記録詳細（期待: 200）
+GET {{baseUrl}}/api/test-records/{{testRecordId}}
+Authorization: Bearer {{token}}
+
+### テスト記録更新（期待: 200）
+PUT {{baseUrl}}/api/test-records/{{testRecordId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "testName": "起動確認",
+  "result": "OK",
+  "notes": "問題なし",
+  "version": 0
+}
+
+### テスト集計（期待: 200）
+GET {{baseUrl}}/api/review-meetings/{{reviewMeetingId}}/test-summary
+Authorization: Bearer {{token}}
+
+########## 5. 指摘 ##########
+
+### 指摘作成（期待: 201）
+# @name createIssue
+POST {{baseUrl}}/api/issues
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "reviewMeetingId": {{reviewMeetingId}},
+  "content": "表示が崩れる",
+  "reporterId": {{memberId}}
+}
+
+### 指摘一覧（未対応で絞り込み）（期待: 200）
+GET {{baseUrl}}/api/issues?reviewMeetingId={{reviewMeetingId}}&status=UNRESOLVED
+Authorization: Bearer {{token}}
+
+### ステータスだけ更新（期待: 200、version が 1 になる）
+# 変更しない項目は行ごと省く（"" を送ると空文字で上書きされる）
+PATCH {{baseUrl}}/api/issues/{{issueId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "IN_PROGRESS",
+  "version": 0
+}
+
+### 回答して完了（期待: 200、version が 2 になる）
+PATCH {{baseUrl}}/api/issues/{{issueId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "answer": "修正済み",
+  "answererId": {{memberId}},
+  "resolvedAt": "{{$datetime 'YYYY-MM-DD'}}",
+  "status": "RESOLVED",
+  "version": 1
+}
+
+### 古い version で更新（期待: 409）
+PATCH {{baseUrl}}/api/issues/{{issueId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "IN_PROGRESS",
+  "version": 1
+}
+
+### 指摘集計（期待: 200、allResolved が true）
+GET {{baseUrl}}/api/review-meetings/{{reviewMeetingId}}/issue-summary
+Authorization: Bearer {{token}}
+
+########## 6. 添付ファイル ##########
+
+### アップロード（期待: 201）
+# @name uploadAttachment
+POST {{baseUrl}}/api/attachments
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=SmokeBoundary
+
+--SmokeBoundary
+Content-Disposition: form-data; name="request"
+Content-Type: application/json
+
+{"reviewMeetingId": {{reviewMeetingId}}, "fileType": "txt"}
+--SmokeBoundary
+Content-Disposition: form-data; name="file"; filename="sample.txt"
+Content-Type: text/plain
+
+< ./sample.txt
+--SmokeBoundary--
+
+### ダウンロードURL取得（期待: 200。local は file:// のパス、prod は S3 の署名付きURL）
+GET {{baseUrl}}/api/attachments/{{attachmentId}}/download
+Authorization: Bearer {{token}}
+
+### 許可されていない拡張子（期待: 400「許可されていないファイル形式です」）
+POST {{baseUrl}}/api/attachments
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=SmokeBoundary
+
+--SmokeBoundary
+Content-Disposition: form-data; name="request"
+Content-Type: application/json
+
+{"reviewMeetingId": {{reviewMeetingId}}, "fileType": "exe"}
+--SmokeBoundary
+Content-Disposition: form-data; name="file"; filename="sample.exe"
+Content-Type: application/octet-stream
+
+< ./sample.txt
+--SmokeBoundary--
+
+########## 7. 参照中の削除 ##########
+
+### 参照されている車種の削除（期待: 409。修正8まではメッセージが「重複しています」になる）
+DELETE {{baseUrl}}/api/models/{{modelId}}
+Authorization: Bearer {{token}}
+
+### 参照されているユーザーの削除（期待: 409。同上）
+DELETE {{baseUrl}}/api/users/{{memberId}}
+Authorization: Bearer {{token}}
+
+########## 8. 削除（子から親の順。作ったデータの後片付けも兼ねる） ##########
+
+### 添付ファイル削除（期待: 204）
+DELETE {{baseUrl}}/api/attachments/{{attachmentId}}
+Authorization: Bearer {{token}}
+
+### 指摘削除（期待: 204）
+DELETE {{baseUrl}}/api/issues/{{issueId}}
+Authorization: Bearer {{token}}
+
+### テスト記録削除（期待: 204）
+DELETE {{baseUrl}}/api/test-records/{{testRecordId}}
+Authorization: Bearer {{token}}
+
+### 検証会削除（期待: 204）
+DELETE {{baseUrl}}/api/review-meetings/{{reviewMeetingId}}
+Authorization: Bearer {{token}}
+
+### 車種削除（期待: 204）
+DELETE {{baseUrl}}/api/models/{{modelId}}
+Authorization: Bearer {{token}}
+
+### ユーザー削除（期待: 204）
+DELETE {{baseUrl}}/api/users/{{memberId}}
+Authorization: Bearer {{token}}
+
+### 削除済みを取得（期待: 404）
+GET {{baseUrl}}/api/models/{{modelId}}
+Authorization: Bearer {{token}}
