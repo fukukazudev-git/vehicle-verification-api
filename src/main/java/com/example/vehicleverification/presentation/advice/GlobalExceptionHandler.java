@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 // ResponseEntityExceptionHandlerを継承することで、Spring MVCが投げる標準例外
@@ -124,6 +125,21 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
+    // Content-Typeはmultipartなのに本文がmultipartとして解析できない場合など、クライアント起因の失敗
+    // サイズ超過(MaxUploadSizeExceededException)はサブクラスとして基底クラスの専用ハンドラ(413)が優先される
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<ErrorResponse> handleMultipart(MultipartException ex, HttpServletRequest request) {
+
+        ErrorResponse body = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                "ファイルのアップロード形式が不正です。multipart/form-dataで送信してください。",
+                request.getRequestURI(),
+                null);
+
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
     // その他の予期しない例外は Internal Server Errorとして処理する
     // 基底クラスが宣言している標準例外は、より具体的な型としてそちらが優先されるため
     // ここには本当に想定外のものだけが来る
@@ -164,8 +180,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
+        // 型変換の失敗(フォーム項目の数値欄に文字列など)は既定メッセージに内部の型名が含まれるため固定文言に置き換える
         List<FieldValidationError> fieldErrors = ex.getBindingResult().getFieldErrors().stream()
-                .map(err -> new FieldValidationError(err.getField(), err.getDefaultMessage()))
+                .map(err -> new FieldValidationError(
+                        err.getField(), err.isBindingFailure() ? "値の形式が不正です" : err.getDefaultMessage()))
                 .toList();
 
         ErrorResponse body = new ErrorResponse(

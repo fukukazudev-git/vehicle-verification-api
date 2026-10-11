@@ -371,10 +371,9 @@ Authorization: Bearer {{token}}
 Content-Type: multipart/form-data; boundary=SmokeBoundary
 
 --SmokeBoundary
-Content-Disposition: form-data; name="request"
-Content-Type: application/json
+Content-Disposition: form-data; name="reviewMeetingId"
 
-{"reviewMeetingId": {{reviewMeetingId}}, "fileType": "txt"}
+{{reviewMeetingId}}
 --SmokeBoundary
 Content-Disposition: form-data; name="file"; filename="sample.txt"
 Content-Type: text/plain
@@ -392,10 +391,9 @@ Authorization: Bearer {{token}}
 Content-Type: multipart/form-data; boundary=SmokeBoundary
 
 --SmokeBoundary
-Content-Disposition: form-data; name="request"
-Content-Type: application/json
+Content-Disposition: form-data; name="reviewMeetingId"
 
-{"reviewMeetingId": {{reviewMeetingId}}, "fileType": "exe"}
+{{reviewMeetingId}}
 --SmokeBoundary
 Content-Disposition: form-data; name="file"; filename="sample.exe"
 Content-Type: application/octet-stream
