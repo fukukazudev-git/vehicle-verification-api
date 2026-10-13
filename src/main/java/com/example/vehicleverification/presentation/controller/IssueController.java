@@ -4,6 +4,7 @@ import com.example.vehicleverification.application.dto.issue.IssueCreateRequest;
 import com.example.vehicleverification.application.dto.issue.IssueCreateResponse;
 import com.example.vehicleverification.application.dto.issue.IssueDetailResponse;
 import com.example.vehicleverification.application.dto.issue.IssueDto;
+import com.example.vehicleverification.application.dto.issue.IssueStatusResponse;
 import com.example.vehicleverification.application.dto.issue.IssueUpdateRequest;
 import com.example.vehicleverification.application.dto.issue.IssueUpdateResponse;
 import com.example.vehicleverification.application.service.IssueService;
@@ -35,6 +36,12 @@ public class IssueController {
     public List<IssueDto> getIssueAll(
             @RequestParam(required = false) Long reviewMeetingId, @RequestParam(required = false) IssueStatus status) {
         return issueService.getIssueAll(reviewMeetingId, status);
+    }
+
+    // ステータスの全語彙(code + 日本語表示名)を返すマスタAPI。/{id} より前に定義し、リテラルパスを優先させる
+    @GetMapping("/statuses")
+    public List<IssueStatusResponse> getIssueStatuses() {
+        return issueService.getIssueStatuses();
     }
 
     @GetMapping("/{id}")

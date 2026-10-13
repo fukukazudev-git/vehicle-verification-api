@@ -12,6 +12,7 @@ import lombok.Setter;
 public class IssueDto {
     private Long id;
     private IssueStatus status;
+    private String statusDisplayName;
     private String content;
     private Long reviewMeetingId;
     private String reviewMeetingTitle;

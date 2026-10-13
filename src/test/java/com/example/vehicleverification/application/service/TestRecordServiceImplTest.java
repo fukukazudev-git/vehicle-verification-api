@@ -2,6 +2,7 @@ package com.example.vehicleverification.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
@@ -9,6 +10,7 @@ import com.example.vehicleverification.application.dto.testrecord.TestRecordCrea
 import com.example.vehicleverification.application.dto.testrecord.TestRecordCreateResponse;
 import com.example.vehicleverification.application.dto.testrecord.TestRecordDetailResponse;
 import com.example.vehicleverification.application.dto.testrecord.TestRecordUpdateRequest;
+import com.example.vehicleverification.application.dto.testrecord.TestResultResponse;
 import com.example.vehicleverification.domain.entity.ReviewMeeting;
 import com.example.vehicleverification.domain.entity.ReviewMeetingStatus;
 import com.example.vehicleverification.domain.entity.TestRecord;
@@ -21,6 +23,7 @@ import com.example.vehicleverification.domain.repository.TestRecordRepository;
 import com.example.vehicleverification.domain.repository.UserRepository;
 import jakarta.persistence.OptimisticLockException;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -64,6 +67,15 @@ class TestRecordServiceImplTest {
         testRecord.setId(id);
 
         return testRecord;
+    }
+
+    @Test
+    void getTestRecordResults_全結果をcodeと日本語表示名で返す() {
+        List<TestResultResponse> result = testRecordService.getTestRecordResults();
+
+        assertThat(result)
+                .extracting(TestResultResponse::getCode, TestResultResponse::getDisplayName)
+                .containsExactly(tuple("OK", "OK"), tuple("NG", "NG"), tuple("PENDING", "保留"));
     }
 
     @Test

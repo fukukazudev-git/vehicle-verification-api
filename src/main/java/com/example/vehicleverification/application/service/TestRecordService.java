@@ -6,12 +6,15 @@ import com.example.vehicleverification.application.dto.testrecord.TestRecordDeta
 import com.example.vehicleverification.application.dto.testrecord.TestRecordDto;
 import com.example.vehicleverification.application.dto.testrecord.TestRecordUpdateRequest;
 import com.example.vehicleverification.application.dto.testrecord.TestRecordUpdateResponse;
+import com.example.vehicleverification.application.dto.testrecord.TestResultResponse;
 import com.example.vehicleverification.domain.entity.TestResult;
 import java.util.List;
 
 public interface TestRecordService {
 
     List<TestRecordDto> getTestRecordsByReviewMeeting(Long reviewMeetingId, TestResult result);
+
+    List<TestResultResponse> getTestRecordResults();
 
     TestRecordDetailResponse getTestRecordById(Long id);
 

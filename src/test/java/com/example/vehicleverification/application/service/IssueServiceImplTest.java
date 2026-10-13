@@ -2,6 +2,7 @@ package com.example.vehicleverification.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
@@ -11,6 +12,7 @@ import com.example.vehicleverification.application.dto.issue.IssueCreateRequest;
 import com.example.vehicleverification.application.dto.issue.IssueCreateResponse;
 import com.example.vehicleverification.application.dto.issue.IssueDetailResponse;
 import com.example.vehicleverification.application.dto.issue.IssueDto;
+import com.example.vehicleverification.application.dto.issue.IssueStatusResponse;
 import com.example.vehicleverification.application.dto.issue.IssueUpdateRequest;
 import com.example.vehicleverification.application.dto.issue.IssueUpdateResponse;
 import com.example.vehicleverification.domain.entity.Issue;
@@ -76,6 +78,19 @@ public class IssueServiceImplTest {
         User user = new User("user" + id, "pass", displayName, "USER", "開発部");
         user.setId(id);
         return user;
+    }
+
+    @Test
+    void getIssueStatuses_全ステータスをcodeと日本語表記で返す() {
+        List<IssueStatusResponse> result = issueService.getIssueStatuses();
+
+        assertThat(result)
+                .extracting(IssueStatusResponse::getCode, IssueStatusResponse::getDisplayName)
+                .containsExactly(
+                        tuple("UNRESOLVED", "未対応"),
+                        tuple("IN_PROGRESS", "対応中"),
+                        tuple("PENDING_APPROVAL", "承認待ち"),
+                        tuple("RESOLVED", "完了"));
     }
 
     @Test

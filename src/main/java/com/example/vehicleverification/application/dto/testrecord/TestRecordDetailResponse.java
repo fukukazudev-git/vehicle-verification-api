@@ -16,6 +16,7 @@ public class TestRecordDetailResponse {
     private Long id;
     private String testName;
     private TestResult result;
+    private String resultDisplayName;
     private String notes;
     private Long reviewMeetingId;
     private String reviewMeetingTitle;
