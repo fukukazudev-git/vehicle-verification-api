@@ -231,7 +231,7 @@ Content-Type: application/json
   "eventCode": "EV-SMOKE"
 }
 
-### ステータスに日本語（期待: 400。修正2で fieldErrors に許容値が出るようになる）
+### ステータスに日本語（期待: 400。fieldErrors に status と許容値）
 POST {{baseUrl}}/api/review-meetings
 Authorization: Bearer {{token}}
 Content-Type: application/json

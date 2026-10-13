@@ -6,7 +6,9 @@ import com.example.vehicleverification.presentation.dto.error.ErrorResponse;
 import com.example.vehicleverification.presentation.dto.error.FieldValidationError;
 import jakarta.persistence.OptimisticLockException;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -14,6 +16,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -24,6 +27,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import tools.jackson.databind.exc.InvalidFormatException;
 
 // ResponseEntityExceptionHandlerを継承することで、Spring MVCが投げる標準例外
 // (型変換失敗・JSONパース失敗・未対応メソッドなど)が基底クラスの個別ハンドラに
@@ -171,6 +175,40 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 null);
 
         return new ResponseEntity<>(body, HttpStatus.CONTENT_TOO_LARGE);
+    }
+
+    // Enumの不正値はJacksonのパース段階で落ちて@Validまで届かないため、ここでfieldErrorsに変換する
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        // 実際に失敗したJacksonの例外を取り出す
+        Throwable cause = ex.getCause();
+        // Throwableの原因がInvalidFormatExceptionかどうかを確認し、判定する
+        if (cause instanceof InvalidFormatException ife
+                && ife.getTargetType() != null
+                && ife.getTargetType().isEnum()) {
+            // getPath()は最後の要素が実際に失敗したフィールドになるため、Size()-1 で末尾を取る
+            String field = ife.getPath().isEmpty()
+                    ? "unknown"
+                    : ife.getPath().get(ife.getPath().size() - 1).getPropertyName();
+            String allowed = Arrays.stream(ife.getTargetType().getEnumConstants())
+                    .map(Object::toString)
+                    .collect(Collectors.joining(", "));
+            // エラー情報のリストを作る
+            List<FieldValidationError> fieldErrors = List.of(new FieldValidationError(field, "許容値: " + allowed));
+
+            ErrorResponse body = new ErrorResponse(
+                    HttpStatus.BAD_REQUEST.value(),
+                    HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                    "入力値が不正です。",
+                    resolvePath(request),
+                    fieldErrors);
+
+            return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+        }
+
+        // Enum以外のパース失敗
+        return handleExceptionInternal(ex, null, headers, status, request);
     }
 
     // バリデーションの例外処理ハンドラ
