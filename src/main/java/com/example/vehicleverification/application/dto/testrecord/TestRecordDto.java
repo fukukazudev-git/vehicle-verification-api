@@ -14,6 +14,7 @@ public class TestRecordDto {
     private Long id;
     private String testName;
     private TestResult result;
+    private String resultDisplayName;
     private Long reviewMeetingId;
     private String reviewMeetingTitle;
     private Long recordedById;

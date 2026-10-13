@@ -4,6 +4,7 @@ import com.example.vehicleverification.application.dto.issue.IssueCreateRequest;
 import com.example.vehicleverification.application.dto.issue.IssueCreateResponse;
 import com.example.vehicleverification.application.dto.issue.IssueDetailResponse;
 import com.example.vehicleverification.application.dto.issue.IssueDto;
+import com.example.vehicleverification.application.dto.issue.IssueStatusResponse;
 import com.example.vehicleverification.application.dto.issue.IssueUpdateRequest;
 import com.example.vehicleverification.application.dto.issue.IssueUpdateResponse;
 import com.example.vehicleverification.domain.entity.Issue;
@@ -15,6 +16,7 @@ import com.example.vehicleverification.domain.repository.IssueRepository;
 import com.example.vehicleverification.domain.repository.ReviewMeetingRepository;
 import com.example.vehicleverification.domain.repository.UserRepository;
 import jakarta.persistence.OptimisticLockException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
@@ -40,6 +42,7 @@ public class IssueServiceImpl implements IssueService {
         return new IssueDto(
                 issue.getId(),
                 issue.getStatus(),
+                issue.getStatus().getDisplayName(),
                 issue.getContent(),
                 issue.getReviewMeeting().getId(),
                 issue.getReviewMeeting().getTitle(),
@@ -68,12 +71,20 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
+    public List<IssueStatusResponse> getIssueStatuses() {
+        return Arrays.stream(IssueStatus.values())
+                .map(status -> new IssueStatusResponse(status.name(), status.getDisplayName()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public IssueDetailResponse getIssueById(Long id) {
         Issue issue = issueRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
 
         return new IssueDetailResponse(
                 issue.getId(),
                 issue.getStatus(),
+                issue.getStatus().getDisplayName(),
                 issue.getContent(),
                 issue.getAnswer(),
                 issue.getResolvedAt(),

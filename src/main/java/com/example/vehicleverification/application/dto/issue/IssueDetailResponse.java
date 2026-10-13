@@ -13,6 +13,7 @@ import lombok.Setter;
 public class IssueDetailResponse {
     private Long id;
     private IssueStatus status;
+    private String statusDisplayName;
     private String content;
     private String answer;
     private LocalDate resolvedAt;

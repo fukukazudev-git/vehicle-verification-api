@@ -7,6 +7,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class ReviewMeetingStatusResponse {
-    private String code; // ReviewMeetingStatus の name() (例: BEFORE_VERIFICATION)
-    private String displayName; // 日本語表示名 (例: 検証前)
+    private String code; // ReviewMeetingStatus の name()
+    private String displayName; // ReviewMeetingStatus の日本語表示名
 }

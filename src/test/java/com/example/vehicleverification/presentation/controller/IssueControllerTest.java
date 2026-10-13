@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.vehicleverification.application.dto.issue.IssueStatusResponse;
 import com.example.vehicleverification.application.dto.issue.IssueUpdateRequest;
 import com.example.vehicleverification.application.dto.issue.IssueUpdateResponse;
 import com.example.vehicleverification.application.service.IssueService;
@@ -22,6 +23,7 @@ import com.example.vehicleverification.infrastructure.security.JwtAuthentication
 import com.example.vehicleverification.infrastructure.security.JwtTokenProvider;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -148,5 +150,22 @@ public class IssueControllerTest {
 
         // Controller/Serviceには到達しないことの確認
         verify(issueService, never()).getIssueById(any(Long.class));
+    }
+
+    @Test
+    void GET_getIssueStatuses_全ステータスをcodeと日本語表示名で返す() throws Exception {
+        given(issueService.getIssueStatuses())
+                .willReturn(List.of(
+                        new IssueStatusResponse("UNRESOLVED", "未対応"),
+                        new IssueStatusResponse("IN_PROGRESS", "対応中"),
+                        new IssueStatusResponse("PENDING_APPROVAL", "承認待ち"),
+                        new IssueStatusResponse("RESOLVED", "完了")));
+        mockMvc.perform(get("/api/issues/statuses"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(4))
+                .andExpect(jsonPath("$[0].code").value("UNRESOLVED"))
+                .andExpect(jsonPath("$[0].displayName").value("未対応"))
+                .andExpect(jsonPath("$[3].code").value("RESOLVED"))
+                .andExpect(jsonPath("$[3].displayName").value("完了"));
     }
 }

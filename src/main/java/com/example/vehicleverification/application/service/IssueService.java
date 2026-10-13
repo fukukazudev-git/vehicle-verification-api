@@ -4,6 +4,7 @@ import com.example.vehicleverification.application.dto.issue.IssueCreateRequest;
 import com.example.vehicleverification.application.dto.issue.IssueCreateResponse;
 import com.example.vehicleverification.application.dto.issue.IssueDetailResponse;
 import com.example.vehicleverification.application.dto.issue.IssueDto;
+import com.example.vehicleverification.application.dto.issue.IssueStatusResponse;
 import com.example.vehicleverification.application.dto.issue.IssueUpdateRequest;
 import com.example.vehicleverification.application.dto.issue.IssueUpdateResponse;
 import com.example.vehicleverification.domain.entity.IssueStatus;
@@ -11,6 +12,8 @@ import java.util.List;
 
 public interface IssueService {
     List<IssueDto> getIssueAll(Long reviewMeetingId, IssueStatus status);
+
+    List<IssueStatusResponse> getIssueStatuses();
 
     IssueDetailResponse getIssueById(Long id);
 

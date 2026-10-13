@@ -7,6 +7,7 @@ import com.example.vehicleverification.application.dto.testrecord.TestRecordDeta
 import com.example.vehicleverification.application.dto.testrecord.TestRecordDto;
 import com.example.vehicleverification.application.dto.testrecord.TestRecordUpdateRequest;
 import com.example.vehicleverification.application.dto.testrecord.TestRecordUpdateResponse;
+import com.example.vehicleverification.application.dto.testrecord.TestResultResponse;
 import com.example.vehicleverification.domain.entity.Attachment;
 import com.example.vehicleverification.domain.entity.ReviewMeeting;
 import com.example.vehicleverification.domain.entity.TestRecord;
@@ -18,6 +19,7 @@ import com.example.vehicleverification.domain.repository.ReviewMeetingRepository
 import com.example.vehicleverification.domain.repository.TestRecordRepository;
 import com.example.vehicleverification.domain.repository.UserRepository;
 import jakarta.persistence.OptimisticLockException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
@@ -48,6 +50,7 @@ public class TestRecordServiceImpl implements TestRecordService {
                 testRecord.getId(),
                 testRecord.getTestName(),
                 testRecord.getResult(),
+                testRecord.getResult().getDisplayName(),
                 testRecord.getReviewMeeting().getId(),
                 testRecord.getReviewMeeting().getTitle(),
                 testRecord.getRecordedBy().getId(),
@@ -93,6 +96,13 @@ public class TestRecordServiceImpl implements TestRecordService {
     }
 
     @Override
+    public List<TestResultResponse> getTestRecordResults() {
+        return Arrays.stream(TestResult.values())
+                .map(result -> new TestResultResponse(result.name(), result.getDisplayName()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public TestRecordDetailResponse getTestRecordById(Long id) {
         TestRecord testRecord = testRecordRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
 
@@ -102,6 +112,7 @@ public class TestRecordServiceImpl implements TestRecordService {
                 testRecord.getId(),
                 testRecord.getTestName(),
                 testRecord.getResult(),
+                testRecord.getResult().getDisplayName(),
                 testRecord.getNotes(),
                 testRecord.getReviewMeeting().getId(),
                 testRecord.getReviewMeeting().getTitle(),

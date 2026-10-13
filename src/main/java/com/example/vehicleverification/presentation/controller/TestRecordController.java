@@ -6,6 +6,7 @@ import com.example.vehicleverification.application.dto.testrecord.TestRecordDeta
 import com.example.vehicleverification.application.dto.testrecord.TestRecordDto;
 import com.example.vehicleverification.application.dto.testrecord.TestRecordUpdateRequest;
 import com.example.vehicleverification.application.dto.testrecord.TestRecordUpdateResponse;
+import com.example.vehicleverification.application.dto.testrecord.TestResultResponse;
 import com.example.vehicleverification.application.service.TestRecordService;
 import com.example.vehicleverification.domain.entity.TestResult;
 import jakarta.validation.Valid;
@@ -36,6 +37,12 @@ public class TestRecordController {
     public List<TestRecordDto> getTestRecordsByReviewMeeting(
             @RequestParam(required = false) Long reviewMeetingId, @RequestParam(required = false) TestResult result) {
         return testRecordService.getTestRecordsByReviewMeeting(reviewMeetingId, result);
+    }
+
+    // 試験結果の全語彙(code + 日本語表示名)を返すマスタAPI。/{id} より前に定義し、リテラルパスを優先させる
+    @GetMapping("/results")
+    public List<TestResultResponse> getTestRecordResults() {
+        return testRecordService.getTestRecordResults();
     }
 
     @GetMapping("/{id}")
