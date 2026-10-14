@@ -7,7 +7,6 @@ import com.example.vehicleverification.application.dto.model.ModelDto;
 import com.example.vehicleverification.application.dto.model.ModelUpdateRequest;
 import com.example.vehicleverification.application.dto.model.ModelUpdateResponse;
 import com.example.vehicleverification.domain.entity.Model;
-import com.example.vehicleverification.domain.exception.DuplicateResourceException;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.domain.repository.ModelRepository;
 import jakarta.persistence.OptimisticLockException;
@@ -43,8 +42,13 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public List<ModelDto> getModelAll() {
-        return modelRepository.findAll().stream().map(this::convertToDto).collect(Collectors.toList());
+    public List<ModelDto> getModelAll(String query) {
+        // 未指定・空文字は絞り込みなし（全件）として扱う
+        List<Model> models = (query == null || query.isBlank())
+                ? modelRepository.findAll()
+                : modelRepository.findByModelCodeContainingIgnoreCaseOrModelNameContainingIgnoreCase(query, query);
+
+        return models.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
     @Override
@@ -62,15 +66,13 @@ public class ModelServiceImpl implements ModelService {
                 model.getDescription(),
                 model.getCreatedAt(),
                 model.getDestination(),
-                model.getPowertrainType());
+                model.getPowertrainType(),
+                model.getVersion());
     }
 
     @Override
     @Transactional
     public ModelCreateResponse createModel(ModelCreateRequest request) {
-        if (modelRepository.existsByModelCode(request.getModelCode())) {
-            throw new DuplicateResourceException("modelCode", "この機種コードは既に登録されています");
-        }
 
         Model model = new Model(
                 request.getModelCode(),
@@ -108,12 +110,6 @@ public class ModelServiceImpl implements ModelService {
             throw new OptimisticLockException();
         }
 
-        // 自分自身は除外して判定する。除外しないとmodelCodeを変えない更新が
-        // すべて重複エラーになる
-        if (modelRepository.existsByModelCodeAndIdNot(request.getModelCode(), id)) {
-            throw new DuplicateResourceException("modelCode", "この機種コードは既に登録されています");
-        }
-
         model.setModelCode(request.getModelCode());
         model.setModelName(request.getModelName());
         model.setModelYear(request.getModelYear());
@@ -137,9 +133,9 @@ public class ModelServiceImpl implements ModelService {
                 saved.getEngineType(),
                 saved.getDriveType(),
                 saved.getDescription(),
-                saved.getVersion(),
                 saved.getDestination(),
-                saved.getPowertrainType());
+                saved.getPowertrainType(),
+                saved.getVersion());
     }
 
     @Override

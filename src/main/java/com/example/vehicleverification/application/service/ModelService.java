@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface ModelService {
 
-    public List<ModelDto> getModelAll();
+    public List<ModelDto> getModelAll(String query);
 
     public ModelDetailResponse getModelById(Long id);
 

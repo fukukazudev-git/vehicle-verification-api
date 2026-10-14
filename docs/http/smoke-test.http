@@ -136,7 +136,35 @@ Content-Type: application/json
 GET {{baseUrl}}/api/models
 Authorization: Bearer {{token}}
 
-### 車種詳細（期待: 200。修正4までは version が返らない）
+### 車種一覧の絞り込み: 機種コードに部分一致・小文字でもヒット（期待: 200、作成した車種を含む）
+GET {{baseUrl}}/api/models?query=t
+Authorization: Bearer {{token}}
+
+### 車種一覧の絞り込み: 機種名に部分一致（期待: 200、作成した車種を含む）
+GET {{baseUrl}}/api/models?query=スモーク
+Authorization: Bearer {{token}}
+
+### 車種一覧の絞り込み: 空文字は全件（期待: 200、絞り込みなしと同じ件数）
+GET {{baseUrl}}/api/models?query=
+Authorization: Bearer {{token}}
+
+### 同じ機種コードで年式違いを登録（期待: 201。機種コードは一意でない）
+POST {{baseUrl}}/api/models
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "modelCode": "{{createModel.response.body.modelCode}}",
+  "modelName": "スモーク車種",
+  "modelYear": 2027,
+  "ecuType": "ECU-A",
+  "engineType": "2.0L",
+  "driveType": "FF",
+  "destination": "JP",
+  "powertrainType": "HEV"
+}
+
+### 車種詳細（期待: 200、version を含む）
 GET {{baseUrl}}/api/models/{{modelId}}
 Authorization: Bearer {{token}}
 
