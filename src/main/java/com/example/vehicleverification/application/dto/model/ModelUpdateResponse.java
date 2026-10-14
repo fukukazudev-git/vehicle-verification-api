@@ -17,7 +17,7 @@ public class ModelUpdateResponse {
     private String engineType;
     private String driveType;
     private String description;
-    private Long version;
     private String destination;
     private String powertrainType;
+    private Long version;
 }

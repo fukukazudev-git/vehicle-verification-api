@@ -21,4 +21,5 @@ public class ModelDetailResponse {
     private LocalDateTime createdAt;
     private String destination;
     private String powertrainType;
+    private Long version;
 }
