@@ -5,14 +5,17 @@ import com.example.vehicleverification.application.dto.user.UserCreateRequest;
 import com.example.vehicleverification.application.dto.user.UserCreateResponse;
 import com.example.vehicleverification.application.dto.user.UserDetailResponse;
 import com.example.vehicleverification.application.dto.user.UserDto;
+import com.example.vehicleverification.application.dto.user.UserRoleResponse;
 import com.example.vehicleverification.application.dto.user.UserUpdateRequest;
 import com.example.vehicleverification.application.dto.user.UserUpdateResponse;
 import com.example.vehicleverification.domain.entity.Attachment;
 import com.example.vehicleverification.domain.entity.User;
+import com.example.vehicleverification.domain.entity.UserRole;
 import com.example.vehicleverification.domain.exception.DuplicateResourceException;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.domain.repository.AttachmentRepository;
 import com.example.vehicleverification.domain.repository.UserRepository;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -41,6 +44,7 @@ public class UserServiceImpl implements UserService {
                 user.getUsername(),
                 user.getDisplayName(),
                 user.getRole(),
+                user.getRole().getDisplayName(),
                 user.getCreatedAt(),
                 user.getDepartment());
     }
@@ -67,6 +71,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<UserRoleResponse> getUserRoles() {
+        return Arrays.stream(UserRole.values())
+                .map(role -> new UserRoleResponse(role.name(), role.getDisplayName()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public UserDetailResponse getUserById(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
 
@@ -77,6 +88,7 @@ public class UserServiceImpl implements UserService {
                 user.getUsername(),
                 user.getDisplayName(),
                 user.getRole(),
+                user.getRole().getDisplayName(),
                 user.getCreatedAt(),
                 user.getDepartment(),
                 attachments.stream().map(this::convertToAttachmentDto).collect(Collectors.toList()));

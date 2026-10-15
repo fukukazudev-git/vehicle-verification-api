@@ -21,6 +21,7 @@ import com.example.vehicleverification.domain.entity.Model;
 import com.example.vehicleverification.domain.entity.ReviewMeeting;
 import com.example.vehicleverification.domain.entity.ReviewMeetingStatus;
 import com.example.vehicleverification.domain.entity.User;
+import com.example.vehicleverification.domain.entity.UserRole;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.domain.repository.IssueRepository;
 import com.example.vehicleverification.domain.repository.ReviewMeetingRepository;
@@ -54,7 +55,7 @@ public class IssueServiceImplTest {
         Model model = new Model("MC0" + id, "モデル" + id, 2026, "テストECU", "エンジン", "AMD", "詳細", "仕向け地", "HEV");
         model.setId(id);
 
-        User reporter = new User("reporter" + id, "pass" + id, "報告者" + id, "USER", "開発部");
+        User reporter = new User("reporter" + id, "pass" + id, "報告者" + id, UserRole.MEMBER, "開発部");
         reporter.setId(id);
 
         ReviewMeeting reviewMeeting = new ReviewMeeting(
@@ -75,7 +76,7 @@ public class IssueServiceImplTest {
     }
 
     private User createDummyUser(Long id, String displayName) {
-        User user = new User("user" + id, "pass", displayName, "USER", "開発部");
+        User user = new User("user" + id, "pass", displayName, UserRole.MEMBER, "開発部");
         user.setId(id);
         return user;
     }

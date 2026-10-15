@@ -52,6 +52,10 @@ GET {{baseUrl}}/api/models
 
 ########## 1. ユーザー ##########
 
+### ロール一覧（期待: 200）
+GET {{baseUrl}}/api/users/roles
+Authorization: Bearer {{token}}
+
 ### MEMBER ユーザー作成（期待: 201）
 # @name createMember
 POST {{baseUrl}}/api/users
@@ -66,7 +70,20 @@ Content-Type: application/json
   "department": "QA"
 }
 
-### ユーザー一覧（期待: 200）
+### ロールに日本語（期待: 400。fieldErrors に role と許容値）
+POST {{baseUrl}}/api/users
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "username": "badrole{{$randomInt 1000 9999}}",
+  "password": "x",
+  "displayName": "x",
+  "role": "管理者",
+  "department": "x"
+}
+
+### ユーザー一覧（期待: 200。role と roleDisplayName を含む）
 GET {{baseUrl}}/api/users
 Authorization: Bearer {{token}}
 

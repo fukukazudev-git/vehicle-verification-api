@@ -16,6 +16,7 @@ import com.example.vehicleverification.application.dto.attachment.AttachmentDto;
 import com.example.vehicleverification.application.dto.attachment.AttachmentUploadRequest;
 import com.example.vehicleverification.application.service.AttachmentService;
 import com.example.vehicleverification.domain.entity.User;
+import com.example.vehicleverification.domain.entity.UserRole;
 import com.example.vehicleverification.infrastructure.config.SecurityConfig;
 import com.example.vehicleverification.infrastructure.security.CustomUserDetails;
 import com.example.vehicleverification.infrastructure.security.CustomUserDetailsService;
@@ -72,7 +73,7 @@ public class AttachmentControllerTest {
     // Controllerは@AuthenticationPrincipal CustomUserDetailsからアップロード者IDを取るため、
     // @WithMockUserではなくCustomUserDetailsを認証情報として渡す
     private CustomUserDetails uploader() {
-        User user = new User("uploader", "pass", "アップロード者", "MEMBER", "開発部");
+        User user = new User("uploader", "pass", "アップロード者", UserRole.MEMBER, "開発部");
         user.setId(UPLOADER_ID);
         return new CustomUserDetails(user);
     }

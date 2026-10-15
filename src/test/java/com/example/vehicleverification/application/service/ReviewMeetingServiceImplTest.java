@@ -18,6 +18,7 @@ import com.example.vehicleverification.domain.entity.Model;
 import com.example.vehicleverification.domain.entity.ReviewMeeting;
 import com.example.vehicleverification.domain.entity.ReviewMeetingStatus;
 import com.example.vehicleverification.domain.entity.User;
+import com.example.vehicleverification.domain.entity.UserRole;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.domain.repository.AttachmentRepository;
 import com.example.vehicleverification.domain.repository.ModelRepository;
@@ -56,7 +57,7 @@ class ReviewMeetingServiceImplTest {
         Model model = new Model("MC0" + id, "モデル" + id, 2026, "テストECU", "エンジン", "AWD", "詳細", "仕向け地", "HEV");
         model.setId(id);
 
-        User organizer = new User("testuser" + id, "pass", "主催者" + id, "ADMIN", "開発部");
+        User organizer = new User("testuser" + id, "pass", "主催者" + id, UserRole.ADMIN, "開発部");
         organizer.setId(id);
 
         ReviewMeeting reviewMeeting =

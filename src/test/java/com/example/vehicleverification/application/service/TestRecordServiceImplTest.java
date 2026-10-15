@@ -16,6 +16,7 @@ import com.example.vehicleverification.domain.entity.ReviewMeetingStatus;
 import com.example.vehicleverification.domain.entity.TestRecord;
 import com.example.vehicleverification.domain.entity.TestResult;
 import com.example.vehicleverification.domain.entity.User;
+import com.example.vehicleverification.domain.entity.UserRole;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.domain.repository.AttachmentRepository;
 import com.example.vehicleverification.domain.repository.ReviewMeetingRepository;
@@ -60,7 +61,7 @@ class TestRecordServiceImplTest {
                 "EVT" + id);
         reviewMeeting.setId(id);
 
-        User recordedBy = new User("testuser" + id, "pass", "記録者" + id, "ADMIN", "開発部");
+        User recordedBy = new User("testuser" + id, "pass", "記録者" + id, UserRole.ADMIN, "開発部");
         recordedBy.setId(id);
 
         TestRecord testRecord = new TestRecord(reviewMeeting, testName, result, "備考", recordedBy);
