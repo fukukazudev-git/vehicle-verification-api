@@ -1,6 +1,7 @@
 package com.example.vehicleverification.infrastructure.config;
 
 import com.example.vehicleverification.domain.entity.User;
+import com.example.vehicleverification.domain.entity.UserRole;
 import com.example.vehicleverification.domain.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +46,11 @@ public class InitialAdminRunner implements CommandLineRunner {
         if (userRepository.count() == 0) {
 
             User admin = new User(
-                    adminUsername, passwordEncoder.encode(adminPassword), adminDisplayName, "ADMIN", adminDepartment);
+                    adminUsername,
+                    passwordEncoder.encode(adminPassword),
+                    adminDisplayName,
+                    UserRole.ADMIN,
+                    adminDepartment);
 
             userRepository.save(admin);
 

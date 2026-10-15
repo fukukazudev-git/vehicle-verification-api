@@ -13,6 +13,7 @@ import com.example.vehicleverification.application.dto.attachment.AttachmentUplo
 import com.example.vehicleverification.domain.entity.ReviewMeeting;
 import com.example.vehicleverification.domain.entity.ReviewMeetingStatus;
 import com.example.vehicleverification.domain.entity.User;
+import com.example.vehicleverification.domain.entity.UserRole;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.domain.repository.AttachmentRepository;
 import com.example.vehicleverification.domain.repository.ReviewMeetingRepository;
@@ -77,7 +78,7 @@ class AttachmentServiceImplTest {
     }
 
     private User dummyUser(Long id) {
-        User user = new User("user" + id, "pass", "表示名" + id, "ADMIN", "開発部");
+        User user = new User("user" + id, "pass", "表示名" + id, UserRole.ADMIN, "開発部");
         user.setId(id);
         return user;
     }

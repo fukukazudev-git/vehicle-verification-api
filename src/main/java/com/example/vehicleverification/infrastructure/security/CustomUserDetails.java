@@ -1,6 +1,7 @@
 package com.example.vehicleverification.infrastructure.security;
 
 import com.example.vehicleverification.domain.entity.User;
+import com.example.vehicleverification.domain.entity.UserRole;
 import java.util.Collection;
 import java.util.List;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,7 +13,7 @@ public class CustomUserDetails implements UserDetails {
     private Long id;
     private String username;
     private String password;
-    private String role;
+    private UserRole role;
 
     public CustomUserDetails(User user) {
         this.id = user.getId();

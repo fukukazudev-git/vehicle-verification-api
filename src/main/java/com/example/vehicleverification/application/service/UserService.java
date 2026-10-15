@@ -4,6 +4,7 @@ import com.example.vehicleverification.application.dto.user.UserCreateRequest;
 import com.example.vehicleverification.application.dto.user.UserCreateResponse;
 import com.example.vehicleverification.application.dto.user.UserDetailResponse;
 import com.example.vehicleverification.application.dto.user.UserDto;
+import com.example.vehicleverification.application.dto.user.UserRoleResponse;
 import com.example.vehicleverification.application.dto.user.UserUpdateRequest;
 import com.example.vehicleverification.application.dto.user.UserUpdateResponse;
 import java.util.List;
@@ -11,6 +12,8 @@ import java.util.List;
 public interface UserService {
 
     public List<UserDto> getUserAll();
+
+    public List<UserRoleResponse> getUserRoles();
 
     public UserDetailResponse getUserById(Long id);
 

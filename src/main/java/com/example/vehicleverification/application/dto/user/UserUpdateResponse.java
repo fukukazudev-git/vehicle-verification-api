@@ -1,5 +1,6 @@
 package com.example.vehicleverification.application.dto.user;
 
+import com.example.vehicleverification.domain.entity.UserRole;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,7 +14,7 @@ public class UserUpdateResponse {
     private Long id;
     private String username;
     private String displayName;
-    private String role;
+    private UserRole role;
     private String department;
     private LocalDateTime createdAt;
 }
