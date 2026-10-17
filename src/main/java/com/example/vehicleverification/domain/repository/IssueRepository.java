@@ -21,5 +21,11 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
     @EntityGraph(attributePaths = {"reviewMeeting", "reporter", "answerer"})
     List<Issue> findAll();
 
+    boolean existsByReporterId(Long reporterId);
+
+    boolean existsByAnswererId(Long answererId);
+
+    boolean existsByReviewMeetingId(Long reviewMeetingId);
+
     long countByReviewMeetingIdAndStatus(Long reviewMeetingId, IssueStatus status);
 }

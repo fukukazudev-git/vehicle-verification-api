@@ -7,8 +7,10 @@ import com.example.vehicleverification.application.dto.model.ModelDto;
 import com.example.vehicleverification.application.dto.model.ModelUpdateRequest;
 import com.example.vehicleverification.application.dto.model.ModelUpdateResponse;
 import com.example.vehicleverification.domain.entity.Model;
+import com.example.vehicleverification.domain.exception.ResourceInUseException;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.domain.repository.ModelRepository;
+import com.example.vehicleverification.domain.repository.ReviewMeetingRepository;
 import jakarta.persistence.OptimisticLockException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,9 +23,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class ModelServiceImpl implements ModelService {
 
     private final ModelRepository modelRepository;
+    private final ReviewMeetingRepository reviewMeetingRepository;
 
-    public ModelServiceImpl(ModelRepository modelRepository) {
+    public ModelServiceImpl(ModelRepository modelRepository, ReviewMeetingRepository reviewMeetingRepository) {
         this.modelRepository = modelRepository;
+        this.reviewMeetingRepository = reviewMeetingRepository;
     }
 
     private ModelDto convertToDto(Model model) {
@@ -138,10 +142,17 @@ public class ModelServiceImpl implements ModelService {
                 saved.getVersion());
     }
 
+    private void validateModelNotInUse(Model model) {
+        if (reviewMeetingRepository.existsByModelId(model.getId())) {
+            throw new ResourceInUseException("この機種は検証会に登録されているため削除できません。");
+        }
+    }
+
     @Override
     @Transactional
     public void deleteModel(Long id) {
         Model model = modelRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
+        validateModelNotInUse(model);
 
         modelRepository.delete(model);
     }

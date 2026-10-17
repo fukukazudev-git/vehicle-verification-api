@@ -1,6 +1,7 @@
 package com.example.vehicleverification.presentation.advice;
 
 import com.example.vehicleverification.domain.exception.DuplicateResourceException;
+import com.example.vehicleverification.domain.exception.ResourceInUseException;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.presentation.dto.error.ErrorResponse;
 import com.example.vehicleverification.presentation.dto.error.FieldValidationError;
@@ -70,6 +71,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.CONFLICT);
     }
 
+    // 参照されているリソースの削除(外部キー制約違反)を事前チェックで検出した場合の例外処理ハンドラ
+    @ExceptionHandler(ResourceInUseException.class)
+    public ResponseEntity<ErrorResponse> handleResourceInUse(ResourceInUseException ex, HttpServletRequest request) {
+
+        ErrorResponse body = new ErrorResponse(
+                HttpStatus.CONFLICT.value(), // status 409
+                HttpStatus.CONFLICT.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI(),
+                null);
+
+        return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+    }
+
     // サービス層の事前チェックとcommitの間に別トランザクションが割り込んだ場合の保険
     // 事前チェックだけでは同時実行時にすり抜けるため両方必要
     @ExceptionHandler(DataIntegrityViolationException.class)
@@ -79,7 +94,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ErrorResponse body = new ErrorResponse(
                 HttpStatus.CONFLICT.value(),
                 HttpStatus.CONFLICT.getReasonPhrase(),
-                "既に登録されている値と重複しています。",
+                "データの整合性エラーが発生しました。",
                 request.getRequestURI(),
                 null);
 
