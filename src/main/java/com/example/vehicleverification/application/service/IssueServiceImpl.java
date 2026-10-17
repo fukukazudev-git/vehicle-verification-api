@@ -123,6 +123,22 @@ public class IssueServiceImpl implements IssueService {
                 saved.getCreatedAt());
     }
 
+    private void validateStatusTransition(Issue issue) {
+
+        String answer = issue.getAnswer();
+        User answerer = issue.getAnswerer();
+        if (issue.getStatus() == IssueStatus.PENDING_APPROVAL) {
+            if (answer == null || answer.isBlank() || answerer == null) {
+                throw new IllegalArgumentException("承認待ちステータス設定には\"回答\"と\"回答者\"の両方が必要です。");
+            }
+        }
+        if (issue.getStatus() == IssueStatus.RESOLVED) {
+            if (answer == null || answer.isBlank() || answerer == null || issue.getResolvedAt() == null) {
+                throw new IllegalArgumentException("完了ステータス設定には\"回答\"・\"回答者\"・\"完了日\"が必要です。");
+            }
+        }
+    }
+
     @Override
     @Transactional
     public IssueUpdateResponse updateIssue(Long id, IssueUpdateRequest request) {
@@ -148,6 +164,9 @@ public class IssueServiceImpl implements IssueService {
                     .orElseThrow(() -> new ResourceNotFoundException(request.getAnswererId()));
             issue.setAnswerer(answerer);
         }
+
+        // ステータス遷移の妥当性を検証
+        validateStatusTransition(issue);
 
         Issue saved = issueRepository.saveAndFlush(issue);
         return new IssueUpdateResponse(

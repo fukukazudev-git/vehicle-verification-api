@@ -133,7 +133,7 @@ public class IssueServiceImplTest {
     }
 
     @Test
-    void createIssue_正常系_CreateResponseを返す() {
+    void createIssue_有効なリクエストの場合_CreateResponseを返す() {
         // Arrange
         Issue issue = createDummyIssue(1L, IssueStatus.PENDING_APPROVAL, null, 0L);
         ReviewMeeting reviewMeeting = issue.getReviewMeeting();
@@ -202,13 +202,16 @@ public class IssueServiceImplTest {
         // 初期状態
         Issue issue = createDummyIssue(1L, IssueStatus.PENDING_APPROVAL, "初期回答", 0L);
 
-        // statusのみ更新
         IssueUpdateRequest request = new IssueUpdateRequest();
+        User answerer = createDummyUser(2L, "回答者");
         request.setStatus(IssueStatus.RESOLVED);
+        request.setAnswererId(answerer.getId());
+        request.setResolvedAt(LocalDate.of(2026, 1, 1));
         request.setVersion(0L);
 
+        given(userRepository.findById(answerer.getId())).willReturn(Optional.of(answerer));
+        given(issueRepository.saveAndFlush(issue)).willReturn(issue);
         given(issueRepository.findById(issue.getId())).willReturn(Optional.of(issue));
-        given(issueRepository.saveAndFlush(any(Issue.class))).willReturn(issue);
 
         // Act
         IssueUpdateResponse response = issueService.updateIssue(issue.getId(), request);
@@ -216,7 +219,6 @@ public class IssueServiceImplTest {
         // Assert
         assertThat(response.getStatus()).isEqualTo(IssueStatus.RESOLVED);
         assertThat(response.getAnswer()).isEqualTo("初期回答");
-        assertThat(response.getResolvedAt()).isNull();
     }
 
     @Test
@@ -228,12 +230,11 @@ public class IssueServiceImplTest {
         IssueUpdateRequest request = new IssueUpdateRequest();
         request.setAnswer("更新回答");
         request.setAnswererId(answerer.getId());
-        request.setStatus(IssueStatus.RESOLVED);
         request.setVersion(0L);
 
         given(issueRepository.findById(issue.getId())).willReturn(Optional.of(issue));
         given(userRepository.findById(answerer.getId())).willReturn(Optional.of(answerer));
-        given(issueRepository.saveAndFlush(any(Issue.class))).willReturn(issue);
+        given(issueRepository.saveAndFlush(issue)).willReturn(issue);
 
         // Act
         IssueUpdateResponse response = issueService.updateIssue(issue.getId(), request);
@@ -292,6 +293,154 @@ public class IssueServiceImplTest {
 
         assertThatThrownBy(() -> issueService.updateIssue(nonExistentId, request))
                 .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    void updateIssue_PENDING_APPROVAL設定時に回答と回答者がある場合_更新される() {
+        // Arrange
+        Issue issue = createDummyIssue(1L, IssueStatus.UNRESOLVED, "初期回答", 0L);
+        IssueUpdateRequest request = new IssueUpdateRequest();
+        User reporter = issue.getReporter();
+        request.setStatus(IssueStatus.PENDING_APPROVAL);
+        request.setAnswer("回答更新");
+        request.setAnswererId(reporter.getId());
+        request.setVersion(0L);
+
+        given(userRepository.findById(reporter.getId())).willReturn(Optional.of(reporter));
+        given(issueRepository.saveAndFlush(issue)).willReturn(issue);
+        given(issueRepository.findById(issue.getId())).willReturn(Optional.of(issue));
+
+        // Act
+        issueService.updateIssue(issue.getId(), request);
+
+        // Assert
+        verify(issueRepository).saveAndFlush(any());
+    }
+
+    @Test
+    void updateIssue_RESOLVED設定時に回答と回答者と完了日が揃っている場合_更新される() {
+        // Arrange
+        Issue issue = createDummyIssue(1L, IssueStatus.UNRESOLVED, "初期回答", 0L);
+        IssueUpdateRequest request = new IssueUpdateRequest();
+        User reporter = issue.getReporter();
+        request.setStatus(IssueStatus.RESOLVED);
+        request.setAnswer("回答更新");
+        request.setAnswererId(reporter.getId());
+        request.setResolvedAt(LocalDate.of(2026, 1, 1));
+        request.setVersion(0L);
+
+        given(userRepository.findById(reporter.getId())).willReturn(Optional.of(reporter));
+        given(issueRepository.saveAndFlush(issue)).willReturn(issue);
+        given(issueRepository.findById(issue.getId())).willReturn(Optional.of(issue));
+
+        // Act
+        issueService.updateIssue(issue.getId(), request);
+
+        // Assert
+        verify(issueRepository).saveAndFlush(any());
+    }
+
+    @Test
+    void updateIssue_IN_PROGRESS設定時に回答無し_更新される() {
+        // Arrange
+        Issue issue = createDummyIssue(1L, IssueStatus.UNRESOLVED, "初期回答", 0L);
+        IssueUpdateRequest request = new IssueUpdateRequest();
+        request.setStatus(IssueStatus.IN_PROGRESS);
+        request.setVersion(0L);
+        // デフォルトの回答無しの状態で進める
+
+        given(issueRepository.saveAndFlush(issue)).willReturn(issue);
+        given(issueRepository.findById(issue.getId())).willReturn(Optional.of(issue));
+
+        // Act
+        issueService.updateIssue(issue.getId(), request);
+
+        // Assert
+        verify(issueRepository).saveAndFlush(any());
+    }
+
+    @Test
+    void updateIssue_UNRESOLVED設定時に回答なし_更新される() {
+        // Arrange
+        Issue issue = createDummyIssue(1L, IssueStatus.UNRESOLVED, "初期回答", 0L);
+        IssueUpdateRequest request = new IssueUpdateRequest();
+
+        request.setStatus(IssueStatus.UNRESOLVED);
+        request.setAnswer("");
+        request.setVersion(0L);
+
+        given(issueRepository.saveAndFlush(issue)).willReturn(issue);
+        given(issueRepository.findById(issue.getId())).willReturn(Optional.of(issue));
+
+        // Act
+        issueService.updateIssue(issue.getId(), request);
+
+        // Assert
+        verify(issueRepository).saveAndFlush(any());
+    }
+
+    @Test
+    void updateIssue_PENDING_APPROVAL設定時に回答が空_IllegalArgumentExceptionを投げる() {
+        // Arrange
+        Issue issue = createDummyIssue(1L, IssueStatus.UNRESOLVED, "初期回答", 0L);
+        IssueUpdateRequest request = new IssueUpdateRequest();
+        User reporter = issue.getReporter();
+        request.setStatus(IssueStatus.PENDING_APPROVAL);
+        request.setAnswer("");
+        request.setAnswererId(reporter.getId());
+        request.setVersion(0L);
+
+        given(userRepository.findById(reporter.getId())).willReturn(Optional.of(reporter));
+        given(issueRepository.findById(issue.getId())).willReturn(Optional.of(issue));
+
+        // Act & Assert
+        assertThatThrownBy(() -> issueService.updateIssue(issue.getId(), request))
+                .isInstanceOf(IllegalArgumentException.class);
+
+        verify(issueRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void updateIssue_PENDING_APPROVAL設定時に回答者が空_IllegalArgumentExceptionを投げる() {
+        // Arrange
+        Issue issue = createDummyIssue(1L, IssueStatus.UNRESOLVED, "初期回答", 0L);
+        IssueUpdateRequest request = new IssueUpdateRequest();
+
+        request.setStatus(IssueStatus.PENDING_APPROVAL);
+        request.setAnswer("回答更新");
+        request.setAnswererId(null);
+        request.setVersion(0L);
+
+        given(issueRepository.findById(issue.getId())).willReturn(Optional.of(issue));
+
+        // Act & Assert
+        assertThatThrownBy(() -> issueService.updateIssue(issue.getId(), request))
+                .isInstanceOf(IllegalArgumentException.class);
+
+        verify(issueRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void updateIssue_RESOLVED設定時に完了日が未設定_IllegalArgumentExceptionを投げる() {
+        // Arrange
+        Issue issue = createDummyIssue(1L, IssueStatus.UNRESOLVED, "初期回答", 0L);
+        IssueUpdateRequest request = new IssueUpdateRequest();
+        User reporter = issue.getReporter();
+
+        request.setStatus(IssueStatus.RESOLVED);
+        request.setAnswer("回答更新");
+        request.setAnswererId(reporter.getId());
+        request.setResolvedAt(null);
+        request.setVersion(0L);
+
+        given(userRepository.findById(reporter.getId())).willReturn(Optional.of(reporter));
+        given(issueRepository.findById(issue.getId())).willReturn(Optional.of(issue));
+
+        // Act & Assert
+        assertThatThrownBy(() -> issueService.updateIssue(issue.getId(), request))
+                .isInstanceOf(IllegalArgumentException.class);
+
+        verify(issueRepository, never()).saveAndFlush(any());
     }
 
     @Test
