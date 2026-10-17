@@ -21,5 +21,9 @@ public interface TestRecordRepository extends JpaRepository<TestRecord, Long> {
     @Override
     List<TestRecord> findAll();
 
+    boolean existsByReviewMeetingId(Long reviewMeetingId);
+
+    boolean existsByRecordedById(Long recordedById);
+
     long countByReviewMeetingIdAndResult(Long reviewMeetingId, TestResult result);
 }

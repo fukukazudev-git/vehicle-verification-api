@@ -14,8 +14,12 @@ import com.example.vehicleverification.domain.entity.Attachment;
 import com.example.vehicleverification.domain.entity.User;
 import com.example.vehicleverification.domain.entity.UserRole;
 import com.example.vehicleverification.domain.exception.DuplicateResourceException;
+import com.example.vehicleverification.domain.exception.ResourceInUseException;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.domain.repository.AttachmentRepository;
+import com.example.vehicleverification.domain.repository.IssueRepository;
+import com.example.vehicleverification.domain.repository.ReviewMeetingRepository;
+import com.example.vehicleverification.domain.repository.TestRecordRepository;
 import com.example.vehicleverification.domain.repository.UserRepository;
 import java.util.Arrays;
 import java.util.List;
@@ -30,14 +34,25 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final ReviewMeetingRepository reviewMeetingRepository;
+    private final IssueRepository issueRepository;
+    private final TestRecordRepository testRecordRepository;
     private final AttachmentRepository attachmentRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public UserServiceImpl(
-            UserRepository userRepository, PasswordEncoder passwordEncoder, AttachmentRepository attachmentRepository) {
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            AttachmentRepository attachmentRepository,
+            ReviewMeetingRepository reviewMeetingRepository,
+            IssueRepository issueRepository,
+            TestRecordRepository testRecordRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.attachmentRepository = attachmentRepository;
+        this.reviewMeetingRepository = reviewMeetingRepository;
+        this.issueRepository = issueRepository;
+        this.testRecordRepository = testRecordRepository;
     }
 
     private UserDto convertToDto(User user) {
@@ -156,10 +171,32 @@ public class UserServiceImpl implements UserService {
                 saved.getCreatedAt());
     }
 
+    private void validateUserNotInUse(User user) {
+        if (reviewMeetingRepository.existsByOrganizerId(user.getId())) {
+            throw new ResourceInUseException("このユーザーは検証会の主催者として登録されているため削除できません。");
+        }
+        if (issueRepository.existsByReporterId(user.getId())) {
+            throw new ResourceInUseException("このユーザーは指摘事項の報告者として登録されているため削除できません。");
+        }
+        if (issueRepository.existsByAnswererId(user.getId())) {
+            throw new ResourceInUseException("このユーザーは指摘事項の回答者として登録されているため削除できません。");
+        }
+        if (testRecordRepository.existsByRecordedById(user.getId())) {
+            throw new ResourceInUseException("このユーザーは試験記録の記録者として登録されているため削除できません。");
+        }
+        if (attachmentRepository.existsByUserId(user.getId())) {
+            throw new ResourceInUseException("このユーザーには添付ファイルが登録されているため削除できません。");
+        }
+        if (attachmentRepository.existsByUploadedById(user.getId())) {
+            throw new ResourceInUseException("このユーザーは添付ファイルのアップロード者として登録されているため削除できません。");
+        }
+    }
+
     @Override
     @Transactional
     public void deleteUser(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
+        validateUserNotInUse(user);
 
         userRepository.delete(user);
     }

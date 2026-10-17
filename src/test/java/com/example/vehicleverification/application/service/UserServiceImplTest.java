@@ -20,8 +20,12 @@ import com.example.vehicleverification.application.dto.user.UserUpdateRequest;
 import com.example.vehicleverification.application.dto.user.UserUpdateResponse;
 import com.example.vehicleverification.domain.entity.User;
 import com.example.vehicleverification.domain.entity.UserRole;
+import com.example.vehicleverification.domain.exception.ResourceInUseException;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.domain.repository.AttachmentRepository;
+import com.example.vehicleverification.domain.repository.IssueRepository;
+import com.example.vehicleverification.domain.repository.ReviewMeetingRepository;
+import com.example.vehicleverification.domain.repository.TestRecordRepository;
 import com.example.vehicleverification.domain.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +48,15 @@ class UserServiceImplTest {
 
     @Mock
     private AttachmentRepository attachmentRepository;
+
+    @Mock
+    private ReviewMeetingRepository reviewMeetingRepository;
+
+    @Mock
+    private IssueRepository issueRepository;
+
+    @Mock
+    private TestRecordRepository testRecordRepository;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -183,5 +196,83 @@ class UserServiceImplTest {
 
         assertThat(user.getRole()).isEqualTo(UserRole.ADMIN);
         assertThat(result.getRole()).isEqualTo(UserRole.ADMIN);
+    }
+
+    @Test
+    void deleteUser_存在するユーザーを削除する場合_正常に削除される() {
+        User user = createDummyUser(1L, UserRole.MEMBER);
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+
+        userService.deleteUser(1L);
+
+        verify(userRepository).delete(user);
+    }
+
+    @Test
+    void deleteUser_存在しないユーザーを削除する場合_ResourceNotFoundExceptionを投げる() {
+        given(userRepository.findById(1L)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.deleteUser(1L)).isInstanceOf(ResourceNotFoundException.class);
+        verify(userRepository, never()).delete(any(User.class));
+    }
+
+    @Test
+    void deleteUser_ReviewMeetingから参照されている場合_ResourceInUseExceptionを投げる() {
+        User user = createDummyUser(1L, UserRole.MEMBER);
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+        given(reviewMeetingRepository.existsByOrganizerId(1L)).willReturn(true);
+
+        assertThatThrownBy(() -> userService.deleteUser(1L)).isInstanceOf(ResourceInUseException.class);
+        verify(userRepository, never()).delete(any(User.class));
+    }
+
+    @Test
+    void deleteUser_Issueからreporterとして参照されている場合_ResourceInUseExceptionを投げる() {
+        User user = createDummyUser(1L, UserRole.MEMBER);
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+        given(issueRepository.existsByReporterId(1L)).willReturn(true);
+
+        assertThatThrownBy(() -> userService.deleteUser(1L)).isInstanceOf(ResourceInUseException.class);
+        verify(userRepository, never()).delete(any(User.class));
+    }
+
+    @Test
+    void deleteUser_Issueからanswererとして参照されている場合_ResourceInUseExceptionを投げる() {
+        User user = createDummyUser(1L, UserRole.MEMBER);
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+        given(issueRepository.existsByAnswererId(1L)).willReturn(true);
+
+        assertThatThrownBy(() -> userService.deleteUser(1L)).isInstanceOf(ResourceInUseException.class);
+        verify(userRepository, never()).delete(any(User.class));
+    }
+
+    @Test
+    void deleteUser_TestRecordからrecordedByとして参照されている場合_ResourceInUseExceptionを投げる() {
+        User user = createDummyUser(1L, UserRole.MEMBER);
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+        given(testRecordRepository.existsByRecordedById(1L)).willReturn(true);
+
+        assertThatThrownBy(() -> userService.deleteUser(1L)).isInstanceOf(ResourceInUseException.class);
+        verify(userRepository, never()).delete(any(User.class));
+    }
+
+    @Test
+    void deleteUser_Attachmentからuserとして参照されている場合_ResourceInUseExceptionを投げる() {
+        User user = createDummyUser(1L, UserRole.MEMBER);
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+        given(attachmentRepository.existsByUserId(1L)).willReturn(true);
+
+        assertThatThrownBy(() -> userService.deleteUser(1L)).isInstanceOf(ResourceInUseException.class);
+        verify(userRepository, never()).delete(any(User.class));
+    }
+
+    @Test
+    void deleteUser_Attachmentからuploaderとして参照されている場合_ResourceInUseExceptionを投げる() {
+        User user = createDummyUser(1L, UserRole.MEMBER);
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+        given(attachmentRepository.existsByUploadedById(1L)).willReturn(true);
+
+        assertThatThrownBy(() -> userService.deleteUser(1L)).isInstanceOf(ResourceInUseException.class);
+        verify(userRepository, never()).delete(any(User.class));
     }
 }

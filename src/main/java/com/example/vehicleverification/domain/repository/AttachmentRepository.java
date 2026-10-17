@@ -10,4 +10,12 @@ public interface AttachmentRepository extends JpaRepository<Attachment, Long> {
     List<Attachment> findByTestRecordId(Long testRecordId);
 
     List<Attachment> findByUserId(Long userId);
+
+    boolean existsByReviewMeetingId(Long reviewMeetingId);
+
+    boolean existsByTestRecordId(Long testRecordId);
+
+    boolean existsByUserId(Long userId);
+
+    boolean existsByUploadedById(Long uploadedById);
 }

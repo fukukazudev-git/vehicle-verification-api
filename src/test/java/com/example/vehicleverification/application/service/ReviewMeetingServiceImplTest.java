@@ -19,10 +19,13 @@ import com.example.vehicleverification.domain.entity.ReviewMeeting;
 import com.example.vehicleverification.domain.entity.ReviewMeetingStatus;
 import com.example.vehicleverification.domain.entity.User;
 import com.example.vehicleverification.domain.entity.UserRole;
+import com.example.vehicleverification.domain.exception.ResourceInUseException;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.domain.repository.AttachmentRepository;
+import com.example.vehicleverification.domain.repository.IssueRepository;
 import com.example.vehicleverification.domain.repository.ModelRepository;
 import com.example.vehicleverification.domain.repository.ReviewMeetingRepository;
+import com.example.vehicleverification.domain.repository.TestRecordRepository;
 import com.example.vehicleverification.domain.repository.UserRepository;
 import java.time.LocalDate;
 import java.util.List;
@@ -43,6 +46,12 @@ class ReviewMeetingServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private IssueRepository issueRepository;
+
+    @Mock
+    private TestRecordRepository testRecordRepository;
 
     @Mock
     private AttachmentRepository attachmentRepository;
@@ -190,5 +199,58 @@ class ReviewMeetingServiceImplTest {
 
         assertThatThrownBy(() -> reviewMeetingService.createReviewMeeting(request))
                 .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    void deleteReviewMeeting_存在する検証会を削除する場合_正常に削除される() {
+        ReviewMeeting reviewMeeting = createDummyReviewMeeting(1L, "定例レビュー", ReviewMeetingStatus.BEFORE_VERIFICATION);
+        given(reviewMeetingRepository.findById(1L)).willReturn(Optional.of(reviewMeeting));
+
+        reviewMeetingService.deleteReviewMeeting(1L);
+
+        verify(reviewMeetingRepository).delete(reviewMeeting);
+    }
+
+    @Test
+    void deleteReviewMeeting_存在しない検証会を削除する場合_ResourceNotFoundExceptionを投げる() {
+        Long nonExistentReviewMeetingId = 999L;
+        given(reviewMeetingRepository.findById(nonExistentReviewMeetingId)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> reviewMeetingService.deleteReviewMeeting(nonExistentReviewMeetingId))
+                .isInstanceOf(ResourceNotFoundException.class);
+        verify(reviewMeetingRepository, never()).delete(any(ReviewMeeting.class));
+    }
+
+    @Test
+    void deleteReviewMeeting_Issueから参照されている場合_ResourceInUseExceptionを投げる() {
+        ReviewMeeting reviewMeeting = createDummyReviewMeeting(1L, "定例レビュー", ReviewMeetingStatus.BEFORE_VERIFICATION);
+        given(reviewMeetingRepository.findById(1L)).willReturn(Optional.of(reviewMeeting));
+        given(issueRepository.existsByReviewMeetingId(1L)).willReturn(true);
+
+        assertThatThrownBy(() -> reviewMeetingService.deleteReviewMeeting(1L))
+                .isInstanceOf(ResourceInUseException.class);
+        verify(reviewMeetingRepository, never()).delete(any(ReviewMeeting.class));
+    }
+
+    @Test
+    void deleteReviewMeeting_testRecordから参照されている場合_ResourceInUseExceptionを投げる() {
+        ReviewMeeting reviewMeeting = createDummyReviewMeeting(1L, "定例レビュー", ReviewMeetingStatus.BEFORE_VERIFICATION);
+        given(reviewMeetingRepository.findById(1L)).willReturn(Optional.of(reviewMeeting));
+        given(testRecordRepository.existsByReviewMeetingId(1L)).willReturn(true);
+
+        assertThatThrownBy(() -> reviewMeetingService.deleteReviewMeeting(1L))
+                .isInstanceOf(ResourceInUseException.class);
+        verify(reviewMeetingRepository, never()).delete(any(ReviewMeeting.class));
+    }
+
+    @Test
+    void deleteReviewMeeting_Attachmentから参照されている場合_ResourceInUseExceptionを投げる() {
+        ReviewMeeting reviewMeeting = createDummyReviewMeeting(1L, "定例レビュー", ReviewMeetingStatus.BEFORE_VERIFICATION);
+        given(reviewMeetingRepository.findById(1L)).willReturn(Optional.of(reviewMeeting));
+        given(attachmentRepository.existsByReviewMeetingId(1L)).willReturn(true);
+
+        assertThatThrownBy(() -> reviewMeetingService.deleteReviewMeeting(1L))
+                .isInstanceOf(ResourceInUseException.class);
+        verify(reviewMeetingRepository, never()).delete(any(ReviewMeeting.class));
     }
 }

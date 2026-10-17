@@ -17,6 +17,7 @@ import com.example.vehicleverification.domain.entity.ReviewMeeting;
 import com.example.vehicleverification.domain.entity.ReviewMeetingStatus;
 import com.example.vehicleverification.domain.entity.TestResult;
 import com.example.vehicleverification.domain.entity.User;
+import com.example.vehicleverification.domain.exception.ResourceInUseException;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.domain.repository.AttachmentRepository;
 import com.example.vehicleverification.domain.repository.IssueRepository;
@@ -211,11 +212,24 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
                 saved.getEventCode());
     }
 
+    private void validateReviewMeetingNotInUse(ReviewMeeting reviewMeeting) {
+        if (testRecordRepository.existsByReviewMeetingId(reviewMeeting.getId())) {
+            throw new ResourceInUseException("この検証会には試験記録が登録されているため削除できません。");
+        }
+        if (issueRepository.existsByReviewMeetingId(reviewMeeting.getId())) {
+            throw new ResourceInUseException("この検証会には指摘事項が登録されているため削除できません。");
+        }
+        if (attachmentRepository.existsByReviewMeetingId(reviewMeeting.getId())) {
+            throw new ResourceInUseException("この検証会には添付ファイルが登録されているため削除できません。");
+        }
+    }
+
     @Override
     @Transactional
     public void deleteReviewMeeting(Long id) {
         ReviewMeeting reviewMeeting =
                 reviewMeetingRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
+        validateReviewMeetingNotInUse(reviewMeeting);
 
         reviewMeetingRepository.delete(reviewMeeting);
     }

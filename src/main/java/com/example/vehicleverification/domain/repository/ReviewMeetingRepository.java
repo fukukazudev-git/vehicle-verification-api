@@ -20,4 +20,8 @@ public interface ReviewMeetingRepository extends JpaRepository<ReviewMeeting, Lo
     @EntityGraph(attributePaths = {"model", "organizer"})
     @Override
     List<ReviewMeeting> findAll();
+
+    boolean existsByOrganizerId(Long organizerId);
+
+    boolean existsByModelId(Long modelId);
 }

@@ -13,6 +13,7 @@ import com.example.vehicleverification.domain.entity.ReviewMeeting;
 import com.example.vehicleverification.domain.entity.TestRecord;
 import com.example.vehicleverification.domain.entity.TestResult;
 import com.example.vehicleverification.domain.entity.User;
+import com.example.vehicleverification.domain.exception.ResourceInUseException;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.domain.repository.AttachmentRepository;
 import com.example.vehicleverification.domain.repository.ReviewMeetingRepository;
@@ -180,11 +181,18 @@ public class TestRecordServiceImpl implements TestRecordService {
                 saved.getVersion());
     }
 
+    private void validateTestRecordNotInUse(TestRecord testRecord) {
+        if (attachmentRepository.existsByTestRecordId(testRecord.getId())) {
+            throw new ResourceInUseException("この試験記録には添付ファイルが登録されているため削除できません。");
+        }
+    }
+
     @Override
     @Transactional
     public void deleteTestRecord(Long id) {
 
         TestRecord testRecord = testRecordRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
+        validateTestRecordNotInUse(testRecord);
 
         testRecordRepository.delete(testRecord);
     }
