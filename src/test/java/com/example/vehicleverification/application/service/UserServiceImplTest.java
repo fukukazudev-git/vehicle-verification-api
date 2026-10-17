@@ -25,6 +25,7 @@ import com.example.vehicleverification.domain.exception.ResourceNotFoundExceptio
 import com.example.vehicleverification.domain.repository.AttachmentRepository;
 import com.example.vehicleverification.domain.repository.IssueRepository;
 import com.example.vehicleverification.domain.repository.ReviewMeetingRepository;
+import com.example.vehicleverification.domain.repository.TestRecordRepository;
 import com.example.vehicleverification.domain.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
@@ -53,6 +54,9 @@ class UserServiceImplTest {
 
     @Mock
     private IssueRepository issueRepository;
+
+    @Mock
+    private TestRecordRepository testRecordRepository;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -237,6 +241,36 @@ class UserServiceImplTest {
         User user = createDummyUser(1L, UserRole.MEMBER);
         given(userRepository.findById(1L)).willReturn(Optional.of(user));
         given(issueRepository.existsByAnswererId(1L)).willReturn(true);
+
+        assertThatThrownBy(() -> userService.deleteUser(1L)).isInstanceOf(ResourceInUseException.class);
+        verify(userRepository, never()).delete(any(User.class));
+    }
+
+    @Test
+    void deleteUser_TestRecordからrecordedByとして参照されている場合_ResourceInUseExceptionを投げる() {
+        User user = createDummyUser(1L, UserRole.MEMBER);
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+        given(testRecordRepository.existsByRecordedById(1L)).willReturn(true);
+
+        assertThatThrownBy(() -> userService.deleteUser(1L)).isInstanceOf(ResourceInUseException.class);
+        verify(userRepository, never()).delete(any(User.class));
+    }
+
+    @Test
+    void deleteUser_Attachmentからuserとして参照されている場合_ResourceInUseExceptionを投げる() {
+        User user = createDummyUser(1L, UserRole.MEMBER);
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+        given(attachmentRepository.existsByUserId(1L)).willReturn(true);
+
+        assertThatThrownBy(() -> userService.deleteUser(1L)).isInstanceOf(ResourceInUseException.class);
+        verify(userRepository, never()).delete(any(User.class));
+    }
+
+    @Test
+    void deleteUser_Attachmentからuploaderとして参照されている場合_ResourceInUseExceptionを投げる() {
+        User user = createDummyUser(1L, UserRole.MEMBER);
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+        given(attachmentRepository.existsByUploadedById(1L)).willReturn(true);
 
         assertThatThrownBy(() -> userService.deleteUser(1L)).isInstanceOf(ResourceInUseException.class);
         verify(userRepository, never()).delete(any(User.class));

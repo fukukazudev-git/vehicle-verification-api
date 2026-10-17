@@ -19,6 +19,7 @@ import com.example.vehicleverification.domain.exception.ResourceNotFoundExceptio
 import com.example.vehicleverification.domain.repository.AttachmentRepository;
 import com.example.vehicleverification.domain.repository.IssueRepository;
 import com.example.vehicleverification.domain.repository.ReviewMeetingRepository;
+import com.example.vehicleverification.domain.repository.TestRecordRepository;
 import com.example.vehicleverification.domain.repository.UserRepository;
 import java.util.Arrays;
 import java.util.List;
@@ -35,6 +36,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final ReviewMeetingRepository reviewMeetingRepository;
     private final IssueRepository issueRepository;
+    private final TestRecordRepository testRecordRepository;
     private final AttachmentRepository attachmentRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -43,12 +45,14 @@ public class UserServiceImpl implements UserService {
             PasswordEncoder passwordEncoder,
             AttachmentRepository attachmentRepository,
             ReviewMeetingRepository reviewMeetingRepository,
-            IssueRepository issueRepository) {
+            IssueRepository issueRepository,
+            TestRecordRepository testRecordRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.attachmentRepository = attachmentRepository;
         this.reviewMeetingRepository = reviewMeetingRepository;
         this.issueRepository = issueRepository;
+        this.testRecordRepository = testRecordRepository;
     }
 
     private UserDto convertToDto(User user) {
@@ -176,6 +180,15 @@ public class UserServiceImpl implements UserService {
         }
         if (issueRepository.existsByAnswererId(user.getId())) {
             throw new ResourceInUseException("このユーザーは指摘事項の回答者として登録されているため削除できません。");
+        }
+        if (testRecordRepository.existsByRecordedById(user.getId())) {
+            throw new ResourceInUseException("このユーザーは試験記録の記録者として登録されているため削除できません。");
+        }
+        if (attachmentRepository.existsByUserId(user.getId())) {
+            throw new ResourceInUseException("このユーザーには添付ファイルが登録されているため削除できません。");
+        }
+        if (attachmentRepository.existsByUploadedById(user.getId())) {
+            throw new ResourceInUseException("このユーザーは添付ファイルのアップロード者として登録されているため削除できません。");
         }
     }
 

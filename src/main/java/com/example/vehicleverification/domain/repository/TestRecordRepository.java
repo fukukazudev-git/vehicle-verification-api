@@ -23,5 +23,7 @@ public interface TestRecordRepository extends JpaRepository<TestRecord, Long> {
 
     boolean existsByReviewMeetingId(Long reviewMeetingId);
 
+    boolean existsByRecordedById(Long recordedById);
+
     long countByReviewMeetingIdAndResult(Long reviewMeetingId, TestResult result);
 }

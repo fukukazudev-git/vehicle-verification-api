@@ -242,4 +242,15 @@ class ReviewMeetingServiceImplTest {
                 .isInstanceOf(ResourceInUseException.class);
         verify(reviewMeetingRepository, never()).delete(any(ReviewMeeting.class));
     }
+
+    @Test
+    void deleteReviewMeeting_Attachmentから参照されている場合_ResourceInUseExceptionを投げる() {
+        ReviewMeeting reviewMeeting = createDummyReviewMeeting(1L, "定例レビュー", ReviewMeetingStatus.BEFORE_VERIFICATION);
+        given(reviewMeetingRepository.findById(1L)).willReturn(Optional.of(reviewMeeting));
+        given(attachmentRepository.existsByReviewMeetingId(1L)).willReturn(true);
+
+        assertThatThrownBy(() -> reviewMeetingService.deleteReviewMeeting(1L))
+                .isInstanceOf(ResourceInUseException.class);
+        verify(reviewMeetingRepository, never()).delete(any(ReviewMeeting.class));
+    }
 }

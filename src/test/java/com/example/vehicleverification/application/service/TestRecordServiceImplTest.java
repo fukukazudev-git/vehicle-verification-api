@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import com.example.vehicleverification.application.dto.testrecord.TestRecordCreateRequest;
 import com.example.vehicleverification.application.dto.testrecord.TestRecordCreateResponse;
@@ -17,6 +19,7 @@ import com.example.vehicleverification.domain.entity.TestRecord;
 import com.example.vehicleverification.domain.entity.TestResult;
 import com.example.vehicleverification.domain.entity.User;
 import com.example.vehicleverification.domain.entity.UserRole;
+import com.example.vehicleverification.domain.exception.ResourceInUseException;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.domain.repository.AttachmentRepository;
 import com.example.vehicleverification.domain.repository.ReviewMeetingRepository;
@@ -170,5 +173,25 @@ class TestRecordServiceImplTest {
         assertThatThrownBy(() -> testRecordService.updateTestRecord(testRecordId, updateRequest))
                 // 単体テストではSpringの例外トランスレーションが適用されないため、JPAのOptimisticLockExceptionがスローされることを確認
                 .isInstanceOf(OptimisticLockException.class);
+    }
+
+    @Test
+    void deleteTestRecord_存在する試験記録を削除する場合_正常に削除される() {
+        TestRecord testRecord = createDummyTestRecord(1L, "制動試験", TestResult.PENDING);
+        given(testRecordRepository.findById(1L)).willReturn(Optional.of(testRecord));
+
+        testRecordService.deleteTestRecord(1L);
+
+        verify(testRecordRepository).delete(testRecord);
+    }
+
+    @Test
+    void deleteTestRecord_Attachmentから参照されている場合_ResourceInUseExceptionを投げる() {
+        TestRecord testRecord = createDummyTestRecord(1L, "制動試験", TestResult.PENDING);
+        given(testRecordRepository.findById(1L)).willReturn(Optional.of(testRecord));
+        given(attachmentRepository.existsByTestRecordId(1L)).willReturn(true);
+
+        assertThatThrownBy(() -> testRecordService.deleteTestRecord(1L)).isInstanceOf(ResourceInUseException.class);
+        verify(testRecordRepository, never()).delete(any(TestRecord.class));
     }
 }

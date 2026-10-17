@@ -219,6 +219,9 @@ public class ReviewMeetingServiceImpl implements ReviewMeetingService {
         if (issueRepository.existsByReviewMeetingId(reviewMeeting.getId())) {
             throw new ResourceInUseException("この検証会には指摘事項が登録されているため削除できません。");
         }
+        if (attachmentRepository.existsByReviewMeetingId(reviewMeeting.getId())) {
+            throw new ResourceInUseException("この検証会には添付ファイルが登録されているため削除できません。");
+        }
     }
 
     @Override
