@@ -169,7 +169,7 @@ public class ReviewMeetingControllerTest {
     }
 
     @Test
-    void GET_getReviewMeetingStatuses_全ステータスをcodeと表示名で返す() throws Exception {
+    void GET_getReviewMeetingStatuses_全ステータスをcodeと日本語表示名で返す() throws Exception {
         given(reviewMeetingService.getReviewMeetingStatuses())
                 .willReturn(List.of(
                         new ReviewMeetingStatusResponse("BEFORE_VERIFICATION", "検証前"),

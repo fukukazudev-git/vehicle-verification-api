@@ -84,7 +84,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void POST_createUser_role省略_400が返りfieldErrorsにroleが入る() throws Exception {
+    void POST_createUser_role省略_400とroleのfieldErrorsを返す() throws Exception {
         UserCreateRequest request = createRequest(null); // @NotNull違反
 
         mockMvc.perform(post("/api/users")
@@ -156,7 +156,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void PUT_updateUser_role省略_400が返りfieldErrorsにroleが入る() throws Exception {
+    void PUT_updateUser_role省略_400とroleのfieldErrorsを返す() throws Exception {
         UserUpdateRequest request = new UserUpdateRequest();
         request.setDisplayName("更新後表示名");
         request.setRole(null); // @NotNull違反

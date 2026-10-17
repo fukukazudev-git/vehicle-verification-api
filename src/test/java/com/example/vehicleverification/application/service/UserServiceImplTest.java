@@ -49,7 +49,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void getUserRoles_全ロールをcodeと日本語表記で返す() {
+    void getUserRoles_全ロールをcodeと日本語表示名で返す() {
         List<UserRoleResponse> result = userService.getUserRoles();
 
         assertThat(result)

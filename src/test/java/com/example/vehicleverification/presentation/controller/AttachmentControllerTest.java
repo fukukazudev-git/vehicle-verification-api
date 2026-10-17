@@ -145,7 +145,7 @@ public class AttachmentControllerTest {
     }
 
     @Test
-    void POST_uploadAttachment_MultipartException_400を返す() throws Exception {
+    void POST_uploadAttachment_MultipartException発生_400を返す() throws Exception {
         // 本文がmultipartとして解析できない場合の例外がControllerAdviceで400になること
         given(attachmentService.upload(any(), any(), any()))
                 .willThrow(new MultipartException("Failed to parse multipart servlet request"));
@@ -159,7 +159,7 @@ public class AttachmentControllerTest {
     }
 
     @Test
-    void POST_uploadAttachment_サイズ超過_MultipartExceptionのハンドラより413が優先される() throws Exception {
+    void POST_uploadAttachment_サイズ超過_MultipartExceptionより優先して413を返す() throws Exception {
         given(attachmentService.upload(any(), any(), any())).willThrow(new MaxUploadSizeExceededException(1L));
 
         mockMvc.perform(multipart("/api/attachments")

@@ -82,7 +82,7 @@ public class IssueServiceImplTest {
     }
 
     @Test
-    void getIssueStatuses_全ステータスをcodeと日本語表記で返す() {
+    void getIssueStatuses_全ステータスをcodeと日本語表示名で返す() {
         List<IssueStatusResponse> result = issueService.getIssueStatuses();
 
         assertThat(result)
@@ -112,7 +112,7 @@ public class IssueServiceImplTest {
     }
 
     @Test
-    void getIssueById_存在しないIDを指定した場合_例外をスローする() {
+    void getIssueById_存在しないIDを指定した場合_ResourceNotFoundExceptionを投げる() {
         Long nonExistentId = 999L;
         given(issueRepository.findById(nonExistentId)).willReturn(Optional.empty());
 
@@ -183,7 +183,7 @@ public class IssueServiceImplTest {
     }
 
     @Test
-    void createIssue_存在しないreviewMeetingIdを指定した場合_例外をスローする() {
+    void createIssue_存在しないreviewMeetingIdを指定した場合_ResourceNotFoundExceptionを投げる() {
         Long nonExistentReviewMeetingId = 999L;
         IssueCreateRequest request = new IssueCreateRequest();
         request.setReviewMeetingId(nonExistentReviewMeetingId);
@@ -245,7 +245,7 @@ public class IssueServiceImplTest {
     }
 
     @Test
-    void updateIssue_存在しないanswererIdを指定した場合_例外をスローする() {
+    void updateIssue_存在しないanswererIdを指定した場合_ResourceNotFoundExceptionを投げる() {
         // Arrange
         Issue issue = createDummyIssue(1L, IssueStatus.PENDING_APPROVAL, "初期回答", 0L);
         Long nonExistentAnswererId = 999L;
@@ -264,7 +264,7 @@ public class IssueServiceImplTest {
     }
 
     @Test
-    void updateIssue_version不一致の場合_楽観ロック例外をスローする() {
+    void updateIssue_version不一致の場合_OptimisticLockExceptionを投げる() {
         // Arrange
         Issue issue = createDummyIssue(1L, IssueStatus.PENDING_APPROVAL, "初期回答", 0L);
 
@@ -282,7 +282,7 @@ public class IssueServiceImplTest {
     }
 
     @Test
-    void updateIssue_存在しないIDを指定した場合_例外をスローする() {
+    void updateIssue_存在しないIDを指定した場合_ResourceNotFoundExceptionを投げる() {
         Long nonExistentId = 999L;
         IssueUpdateRequest request = new IssueUpdateRequest();
         request.setStatus(IssueStatus.RESOLVED);
@@ -305,7 +305,7 @@ public class IssueServiceImplTest {
     }
 
     @Test
-    void deleteIssue_存在しないIDを指定した場合_例外をスローする() {
+    void deleteIssue_存在しないIDを指定した場合_ResourceNotFoundExceptionを投げる() {
         Long nonExistentId = 999L;
         given(issueRepository.findById(nonExistentId)).willReturn(Optional.empty());
 
