@@ -194,7 +194,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void GET_getUserList_roleのコード値と日本語表示名を返す() throws Exception {
+    void GET_getUserAll_roleのコード値と日本語表示名を返す() throws Exception {
         given(userService.getUserAll())
                 .willReturn(List.of(new UserDto(
                         1L, "admin", "管理者ユーザー", UserRole.ADMIN, "管理者", LocalDateTime.of(2026, 1, 1, 0, 0), "開発部")));
