@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.vehicleverification.application.dto.user.PasswordResetRequest;
 import com.example.vehicleverification.application.dto.user.UserCreateRequest;
 import com.example.vehicleverification.application.dto.user.UserCreateResponse;
 import com.example.vehicleverification.application.dto.user.UserDto;
@@ -84,7 +85,49 @@ public class UserControllerTest {
     }
 
     @Test
-    void POST_createUser_role省略_400が返りfieldErrorsにroleが入る() throws Exception {
+    void PUT_resetPassword_正常系_204を返す() throws Exception {
+        PasswordResetRequest request = new PasswordResetRequest();
+        request.setNewPassword("newPassword");
+
+        mockMvc.perform(put("/api/users/1/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNoContent());
+
+        verify(userService).resetPassword(eq(1L), any(PasswordResetRequest.class));
+    }
+
+    @Test
+    void PUT_resetPassword_8文字未満_400を返す() throws Exception {
+        PasswordResetRequest request = new PasswordResetRequest();
+        request.setNewPassword("short");
+
+        mockMvc.perform(put("/api/users/1/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fieldErrors[0].field").value("newPassword"))
+                .andExpect(jsonPath("$.fieldErrors[0].message").value("新しいパスワードは8文字以上で入力してください"));
+
+        verify(userService, never()).resetPassword(any(), any());
+    }
+
+    @Test
+    @WithMockUser(username = "member", roles = "MEMBER")
+    void PUT_resetPassword_MEMBERロール_403を返す() throws Exception {
+        PasswordResetRequest request = new PasswordResetRequest();
+        request.setNewPassword("newPassword");
+
+        mockMvc.perform(put("/api/users/1/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+
+        verify(userService, never()).resetPassword(any(), any());
+    }
+
+    @Test
+    void POST_createUser_role省略_400とroleのfieldErrorsを返す() throws Exception {
         UserCreateRequest request = createRequest(null); // @NotNull違反
 
         mockMvc.perform(post("/api/users")
@@ -156,7 +199,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void PUT_updateUser_role省略_400が返りfieldErrorsにroleが入る() throws Exception {
+    void PUT_updateUser_role省略_400とroleのfieldErrorsを返す() throws Exception {
         UserUpdateRequest request = new UserUpdateRequest();
         request.setDisplayName("更新後表示名");
         request.setRole(null); // @NotNull違反
@@ -194,7 +237,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void GET_getUserList_roleのコード値と日本語表示名を返す() throws Exception {
+    void GET_getUserAll_roleのコード値と日本語表示名を返す() throws Exception {
         given(userService.getUserAll())
                 .willReturn(List.of(new UserDto(
                         1L, "admin", "管理者ユーザー", UserRole.ADMIN, "管理者", LocalDateTime.of(2026, 1, 1, 0, 0), "開発部")));

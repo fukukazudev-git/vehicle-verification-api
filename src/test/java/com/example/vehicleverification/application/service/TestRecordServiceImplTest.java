@@ -97,7 +97,7 @@ class TestRecordServiceImplTest {
     }
 
     @Test
-    void getTestRecordById_存在しないIDを指定した場合_例外をスローする() {
+    void getTestRecordById_存在しないIDを指定した場合_ResourceNotFoundExceptionを投げる() {
 
         Long nonExistentId = 999L;
         given(testRecordRepository.findById(nonExistentId)).willReturn(Optional.empty());
@@ -134,7 +134,7 @@ class TestRecordServiceImplTest {
     }
 
     @Test
-    void createTestRecord_存在しないreviewMeetingIdを指定した場合_例外をスローする() {
+    void createTestRecord_存在しないreviewMeetingIdを指定した場合_ResourceNotFoundExceptionを投げる() {
         // Arrange
         Long nonExistentReviewMeetingId = 999L;
         TestRecordCreateRequest request = new TestRecordCreateRequest();
@@ -152,7 +152,7 @@ class TestRecordServiceImplTest {
     }
 
     @Test
-    void updateTestRecord_楽観的ロック違反_例外をスローする() {
+    void updateTestRecord_version不一致の場合_OptimisticLockExceptionを投げる() {
         // Arrange
         TestRecord testRecord = createDummyTestRecord(1L, "テスト1", TestResult.OK);
         testRecord.setVersion(0L);

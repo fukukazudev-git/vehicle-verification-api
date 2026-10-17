@@ -99,7 +99,7 @@ class ReviewMeetingServiceImplTest {
     }
 
     @Test
-    void getReviewMeetingById_存在しないIDを指定した場合_例外をスローする() {
+    void getReviewMeetingById_存在しないIDを指定した場合_ResourceNotFoundExceptionを投げる() {
         Long nonExistentId = 999L;
         given(reviewMeetingRepository.findById(nonExistentId)).willReturn(Optional.empty());
 
@@ -173,7 +173,7 @@ class ReviewMeetingServiceImplTest {
     }
 
     @Test
-    void createReviewMeeting_存在しないmodelIdを指定した場合_例外をスローする() {
+    void createReviewMeeting_存在しないmodelIdを指定した場合_ResourceNotFoundExceptionを投げる() {
 
         Long nonExistentModelId = 999L;
 

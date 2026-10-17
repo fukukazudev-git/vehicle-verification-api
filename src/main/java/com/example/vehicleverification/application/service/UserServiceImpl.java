@@ -1,6 +1,8 @@
 package com.example.vehicleverification.application.service;
 
 import com.example.vehicleverification.application.dto.attachment.AttachmentDto;
+import com.example.vehicleverification.application.dto.user.PasswordChangeRequest;
+import com.example.vehicleverification.application.dto.user.PasswordResetRequest;
 import com.example.vehicleverification.application.dto.user.UserCreateRequest;
 import com.example.vehicleverification.application.dto.user.UserCreateResponse;
 import com.example.vehicleverification.application.dto.user.UserDetailResponse;
@@ -66,6 +68,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
+    public void changePassword(Long userId, PasswordChangeRequest request) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException(userId));
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("現在のパスワードが正しくありません。");
+        }
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+    }
+
+    @Override
     public List<UserDto> getUserAll() {
         return userRepository.findAll().stream().map(this::convertToDto).collect(Collectors.toList());
     }
@@ -92,6 +104,13 @@ public class UserServiceImpl implements UserService {
                 user.getCreatedAt(),
                 user.getDepartment(),
                 attachments.stream().map(this::convertToAttachmentDto).collect(Collectors.toList()));
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(Long id, PasswordResetRequest request) {
+        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
     }
 
     @Override
