@@ -1,11 +1,16 @@
 package com.example.vehicleverification.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import com.example.vehicleverification.application.dto.user.PasswordChangeRequest;
+import com.example.vehicleverification.application.dto.user.PasswordResetRequest;
 import com.example.vehicleverification.application.dto.user.UserCreateRequest;
 import com.example.vehicleverification.application.dto.user.UserCreateResponse;
 import com.example.vehicleverification.application.dto.user.UserDetailResponse;
@@ -15,6 +20,7 @@ import com.example.vehicleverification.application.dto.user.UserUpdateRequest;
 import com.example.vehicleverification.application.dto.user.UserUpdateResponse;
 import com.example.vehicleverification.domain.entity.User;
 import com.example.vehicleverification.domain.entity.UserRole;
+import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.domain.repository.AttachmentRepository;
 import com.example.vehicleverification.domain.repository.UserRepository;
 import java.util.List;
@@ -55,6 +61,66 @@ class UserServiceImplTest {
         assertThat(result)
                 .extracting(UserRoleResponse::getCode, UserRoleResponse::getDisplayName)
                 .containsExactly(tuple("ADMIN", "管理者"), tuple("MEMBER", "メンバー"));
+    }
+
+    @Test
+    void changePassword_現在のパスワードが一致しない場合_IllegalArgumentExceptionを投げる() {
+        User user = createDummyUser(1L, UserRole.MEMBER);
+        String wrongCurrentPassword = "wrongCurrentPassword";
+        PasswordChangeRequest passwordChangeRequest = new PasswordChangeRequest();
+        passwordChangeRequest.setCurrentPassword(wrongCurrentPassword);
+        passwordChangeRequest.setNewPassword("newPassword");
+
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+        given(passwordEncoder.matches(wrongCurrentPassword, user.getPassword())).willReturn(false);
+
+        assertThatThrownBy(() -> userService.changePassword(1L, passwordChangeRequest))
+                .isInstanceOf(IllegalArgumentException.class);
+
+        verify(passwordEncoder, never()).encode(anyString());
+    }
+
+    @Test
+    void changePassword_現在のパスワードが一致する場合_エンコードした新しいパスワードで更新する() {
+        User user = createDummyUser(1L, UserRole.MEMBER);
+        PasswordChangeRequest passwordChangeRequest = new PasswordChangeRequest();
+        passwordChangeRequest.setCurrentPassword("currentPassword");
+        passwordChangeRequest.setNewPassword("newPassword");
+
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+        given(passwordEncoder.matches("currentPassword", user.getPassword())).willReturn(true);
+        given(passwordEncoder.encode("newPassword")).willReturn("encodedNewPassword");
+
+        userService.changePassword(1L, passwordChangeRequest);
+
+        assertThat(user.getPassword()).isEqualTo("encodedNewPassword");
+    }
+
+    @Test
+    void resetPassword_存在するIDを指定した場合_エンコードした新しいパスワードで更新する() {
+        User user = createDummyUser(1L, UserRole.MEMBER);
+        PasswordResetRequest passwordResetRequest = new PasswordResetRequest();
+        passwordResetRequest.setNewPassword("newPassword");
+
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+        given(passwordEncoder.encode("newPassword")).willReturn("encodedNewPassword");
+
+        userService.resetPassword(1L, passwordResetRequest);
+
+        assertThat(user.getPassword()).isEqualTo("encodedNewPassword");
+    }
+
+    @Test
+    void resetPassword_存在しないIDを指定した場合_ResourceNotFoundExceptionを投げる() {
+        PasswordResetRequest passwordResetRequest = new PasswordResetRequest();
+        passwordResetRequest.setNewPassword("newPassword");
+
+        given(userRepository.findById(999L)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.resetPassword(999L, passwordResetRequest))
+                .isInstanceOf(ResourceNotFoundException.class);
+
+        verify(passwordEncoder, never()).encode(anyString());
     }
 
     @Test

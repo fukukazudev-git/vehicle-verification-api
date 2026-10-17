@@ -72,6 +72,10 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/api/auth/**")
                         .permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/users/me/password")
+                        .authenticated() // me/password は */password に含まれて認可されてしまうため、先に置く
+                        .requestMatchers(HttpMethod.PUT, "/api/users/*/password")
+                        .hasRole("ADMIN") // 他ユーザのパスワード変更は管理者のみ許可
                         .requestMatchers(HttpMethod.POST, "/api/users")
                         .hasRole("ADMIN") // ユーザ登録は管理者のみ許可
                         .requestMatchers(HttpMethod.PUT, "/api/users/*")

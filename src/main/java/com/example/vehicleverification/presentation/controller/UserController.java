@@ -1,5 +1,7 @@
 package com.example.vehicleverification.presentation.controller;
 
+import com.example.vehicleverification.application.dto.user.PasswordChangeRequest;
+import com.example.vehicleverification.application.dto.user.PasswordResetRequest;
 import com.example.vehicleverification.application.dto.user.UserCreateRequest;
 import com.example.vehicleverification.application.dto.user.UserCreateResponse;
 import com.example.vehicleverification.application.dto.user.UserDetailResponse;
@@ -8,9 +10,11 @@ import com.example.vehicleverification.application.dto.user.UserRoleResponse;
 import com.example.vehicleverification.application.dto.user.UserUpdateRequest;
 import com.example.vehicleverification.application.dto.user.UserUpdateResponse;
 import com.example.vehicleverification.application.service.UserService;
+import com.example.vehicleverification.infrastructure.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,6 +35,15 @@ public class UserController {
         this.userService = userService;
     }
 
+    // ログインユーザー本人用 パスワード再設定エンドポイント
+    @PutMapping("/me/password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void changePassword(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @Valid @RequestBody PasswordChangeRequest request) {
+        userService.changePassword(customUserDetails.getId(), request);
+    }
+
     @GetMapping("/roles")
     public List<UserRoleResponse> getUserRoles() {
         return userService.getUserRoles();
@@ -44,6 +57,13 @@ public class UserController {
     @GetMapping("/{id}")
     public UserDetailResponse getUserById(@PathVariable Long id) {
         return userService.getUserById(id);
+    }
+
+    // 管理者用 パスワードリセットエンドポイント
+    @PutMapping("/{id}/password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void resetPassword(@PathVariable Long id, @Valid @RequestBody PasswordResetRequest request) {
+        userService.resetPassword(id, request);
     }
 
     @PostMapping

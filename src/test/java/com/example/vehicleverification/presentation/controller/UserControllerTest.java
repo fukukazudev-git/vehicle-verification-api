@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.vehicleverification.application.dto.user.PasswordResetRequest;
 import com.example.vehicleverification.application.dto.user.UserCreateRequest;
 import com.example.vehicleverification.application.dto.user.UserCreateResponse;
 import com.example.vehicleverification.application.dto.user.UserDto;
@@ -81,6 +82,48 @@ public class UserControllerTest {
         request.setRole(role);
         request.setDepartment("開発部");
         return request;
+    }
+
+    @Test
+    void PUT_resetPassword_正常系_204を返す() throws Exception {
+        PasswordResetRequest request = new PasswordResetRequest();
+        request.setNewPassword("newPassword");
+
+        mockMvc.perform(put("/api/users/1/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNoContent());
+
+        verify(userService).resetPassword(eq(1L), any(PasswordResetRequest.class));
+    }
+
+    @Test
+    void PUT_resetPassword_8文字未満_400を返す() throws Exception {
+        PasswordResetRequest request = new PasswordResetRequest();
+        request.setNewPassword("short");
+
+        mockMvc.perform(put("/api/users/1/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fieldErrors[0].field").value("newPassword"))
+                .andExpect(jsonPath("$.fieldErrors[0].message").value("新しいパスワードは8文字以上で入力してください"));
+
+        verify(userService, never()).resetPassword(any(), any());
+    }
+
+    @Test
+    @WithMockUser(username = "member", roles = "MEMBER")
+    void PUT_resetPassword_MEMBERロール_403を返す() throws Exception {
+        PasswordResetRequest request = new PasswordResetRequest();
+        request.setNewPassword("newPassword");
+
+        mockMvc.perform(put("/api/users/1/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+
+        verify(userService, never()).resetPassword(any(), any());
     }
 
     @Test

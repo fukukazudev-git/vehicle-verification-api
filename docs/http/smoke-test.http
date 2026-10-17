@@ -129,6 +129,63 @@ Content-Type: application/json
 GET {{baseUrl}}/api/models
 Authorization: Bearer {{memberToken}}
 
+### MEMBER 用パスワード再設定（期待: 204）
+PUT {{baseUrl}}/api/users/me/password
+Authorization: Bearer {{memberToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "{{$dotenv MEMBER_PASSWORD}}",
+  "newPassword": "{{$dotenv NEW_PASSWORD_FOR_MEMBER}}"
+}
+
+### MEMBER 用パスワード再設定 パスワード不一致（期待: 400）
+PUT {{baseUrl}}/api/users/me/password
+Authorization: Bearer {{memberToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "wrongPassword",
+  "newPassword": "memberNewPassword"
+}
+
+### MEMBER 用パスワード再設定 期待より短いため失敗（期待: 400）
+PUT {{baseUrl}}/api/users/me/password
+Authorization: Bearer {{memberToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "{{$dotenv MEMBER_PASSWORD}}",
+  "newPassword": "short"
+}
+
+### 管理者用 パスワード再設定（期待: 204）
+PUT {{baseUrl}}/api/users/{{memberId}}/password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "newPassword": "{{$dotenv NEW_PASSWORD_FOR_ADMIN}}"
+}
+
+### 管理者用 パスワード再設定 期待より短いため失敗（期待: 400）
+PUT {{baseUrl}}/api/users/{{memberId}}/password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "newPassword": "short"
+}
+
+### 管理者用 MEMBERトークンでパスワード再設定（期待: 403）
+PUT {{baseUrl}}/api/users/{{memberId}}/password
+Authorization: Bearer {{memberToken}}
+Content-Type: application/json
+
+{
+  "newPassword": "{{$dotenv NEW_PASSWORD_FOR_ADMIN}}"
+}
+
 ########## 2. 車種 ##########
 
 ### 車種作成（期待: 201）
