@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.vehicleverification.application.dto.user.PasswordChangeRequest;
 import com.example.vehicleverification.application.dto.user.PasswordResetRequest;
 import com.example.vehicleverification.application.dto.user.UserCreateRequest;
 import com.example.vehicleverification.application.dto.user.UserCreateResponse;
@@ -113,6 +114,25 @@ public class UserControllerTest {
     }
 
     @Test
+    void PUT_changePassword_currentPasswordが空_400とfieldErrorsを返す() throws Exception {
+        // 本人用は /me/password。/{id}/password は管理者用リセットでDTOが別物になる
+        PasswordChangeRequest request = new PasswordChangeRequest();
+        request.setCurrentPassword(""); // @NotBlank違反
+        request.setNewPassword("newPassword");
+
+        // fieldErrorsの並び順は保証されないため、違反は1項目だけに絞って位置で検証する
+        mockMvc.perform(put("/api/users/me/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fieldErrors.length()").value(1))
+                .andExpect(jsonPath("$.fieldErrors[0].field").value("currentPassword"))
+                .andExpect(jsonPath("$.fieldErrors[0].message").value("現在のパスワードは必須です"));
+
+        verify(userService, never()).changePassword(any(), any());
+    }
+
+    @Test
     @WithMockUser(username = "member", roles = "MEMBER")
     void PUT_resetPassword_MEMBERロール_403を返す() throws Exception {
         PasswordResetRequest request = new PasswordResetRequest();
@@ -199,6 +219,21 @@ public class UserControllerTest {
     }
 
     @Test
+    void POST_createUser_usernameが空_400とfieldErrorsを返す() throws Exception {
+        UserCreateRequest request = createRequest(UserRole.MEMBER);
+        request.setUsername(""); // @NotBlank違反
+
+        mockMvc.perform(post("/api/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fieldErrors[0].field").value("username"))
+                .andExpect(jsonPath("$.fieldErrors[0].message").value("ユーザー名は必須です"));
+
+        verify(userService, never()).createUser(any());
+    }
+
+    @Test
     void PUT_updateUser_role省略_400とroleのfieldErrorsを返す() throws Exception {
         UserUpdateRequest request = new UserUpdateRequest();
         request.setDisplayName("更新後表示名");
@@ -234,6 +269,15 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.fieldErrors[0].message").value("許容値: ADMIN, MEMBER"));
 
         verify(userService, never()).updateUser(eq(1L), any());
+    }
+
+    @Test
+    void GET_getUserById_IDに数値以外_400を返す() throws Exception {
+        mockMvc.perform(get("/api/users/{id}", "abc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("リクエストの形式が不正です。"));
+
+        verify(userService, never()).getUserById(any());
     }
 
     @Test

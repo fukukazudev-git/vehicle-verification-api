@@ -8,9 +8,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.vehicleverification.application.dto.issue.IssueCreateRequest;
 import com.example.vehicleverification.application.dto.issue.IssueStatusResponse;
 import com.example.vehicleverification.application.dto.issue.IssueUpdateRequest;
 import com.example.vehicleverification.application.dto.issue.IssueUpdateResponse;
@@ -136,6 +138,67 @@ public class IssueControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.fieldErrors").isNotEmpty())
                 .andExpect(jsonPath("$.fieldErrors[?(@.field == 'version')]").exists());
+    }
+
+    @Test
+    void PATCH_updateIssue_statusに不正値_400と許容値のfieldErrorsを返す() throws Exception {
+        // 不正なEnum値はDTOに詰められないため、JSON文字列を直接送る
+        String body =
+                """
+                {
+                  "status": "DONE",
+                  "version": 0
+                }
+                """;
+
+        mockMvc.perform(patch("/api/issues/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fieldErrors[0].field").value("status"))
+                .andExpect(jsonPath("$.fieldErrors[0].message")
+                        .value("許容値: UNRESOLVED, IN_PROGRESS, PENDING_APPROVAL, RESOLVED"));
+
+        verify(issueService, never()).updateIssue(any(), any());
+    }
+
+    @Test
+    void POST_createIssue_contentが空_400とfieldErrorsを返す() throws Exception {
+        IssueCreateRequest request = new IssueCreateRequest();
+        request.setReviewMeetingId(1L);
+        request.setContent(""); // @NotBlank違反
+        request.setReporterId(1L);
+
+        mockMvc.perform(post("/api/issues")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fieldErrors.length()").value(1))
+                .andExpect(jsonPath("$.fieldErrors[0].field").value("content"));
+
+        verify(issueService, never()).createIssue(any());
+    }
+
+    @Test
+    void POST_createIssue_JSONが壊れている_400を返す() throws Exception {
+        // Enum以外のパース失敗は、内部の例外メッセージを漏らさず固定文言で返す
+        mockMvc.perform(post("/api/issues")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"content\": "))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("リクエストの形式が不正です。"))
+                .andExpect(jsonPath("$.fieldErrors").doesNotExist());
+
+        verify(issueService, never()).createIssue(any());
+    }
+
+    @Test
+    void GET_getIssueAll_statusクエリに不正値_400を返す() throws Exception {
+        mockMvc.perform(get("/api/issues").param("status", "DONE"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("リクエストの形式が不正です。"));
+
+        verify(issueService, never()).getIssueAll(any(), any());
     }
 
     @Test
