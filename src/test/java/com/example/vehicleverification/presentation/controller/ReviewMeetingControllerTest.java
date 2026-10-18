@@ -8,6 +8,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -15,6 +16,7 @@ import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeeti
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingCreateResponse;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingDetailResponse;
 import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingStatusResponse;
+import com.example.vehicleverification.application.dto.reviewmeeting.ReviewMeetingUpdateRequest;
 import com.example.vehicleverification.application.service.ReviewMeetingService;
 import com.example.vehicleverification.domain.entity.ReviewMeetingStatus;
 import com.example.vehicleverification.infrastructure.config.SecurityConfig;
@@ -197,6 +199,72 @@ public class ReviewMeetingControllerTest {
                 .andExpect(jsonPath("$.path").value("/api/review-meetings/1"));
 
         // 未認証で弾かれるべきであるため、Controller/Serviceには到達していないことも確認する
+        verify(reviewMeetingService, never()).getReviewMeetingById(any());
+    }
+
+    @Test
+    void PUT_updateReviewMeeting_statusに不正値_400と許容値のfieldErrorsを返す() throws Exception {
+        // 不正なEnum値はDTOに詰められないため、JSON文字列を直接送る
+        String body =
+                """
+                {
+                  "title": "定例レビュー",
+                  "scheduledDate": "2026-01-01",
+                  "status": "INVALID_STATUS",
+                  "organizerId": 1,
+                  "eventCode": "EVT001",
+                  "version": 0
+                }
+                """;
+
+        mockMvc.perform(put("/api/review-meetings/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fieldErrors[0].field").value("status"))
+                .andExpect(jsonPath("$.fieldErrors[0].message")
+                        .value("許容値: BEFORE_VERIFICATION, IN_VERIFICATION, COMPLETED, CANCELLED"));
+
+        verify(reviewMeetingService, never()).updateReviewMeeting(any(), any());
+    }
+
+    @Test
+    void PUT_updateReviewMeeting_versionなし_400とfieldErrorsを返す() throws Exception {
+        ReviewMeetingUpdateRequest request = new ReviewMeetingUpdateRequest();
+        request.setTitle("定例レビュー");
+        request.setScheduledDate(LocalDate.of(2026, 1, 1));
+        request.setStatus(ReviewMeetingStatus.IN_VERIFICATION);
+        request.setOrganizerId(1L);
+        request.setEventCode("EVT001");
+        // versionを設定しない(@NotNull違反)
+
+        mockMvc.perform(put("/api/review-meetings/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fieldErrors.length()").value(1))
+                .andExpect(jsonPath("$.fieldErrors[0].field").value("version"));
+
+        verify(reviewMeetingService, never()).updateReviewMeeting(any(), any());
+    }
+
+    @Test
+    void GET_getReviewMeetingAll_statusクエリに不正値_400を返す() throws Exception {
+        // クエリパラメータのEnum変換失敗はMethodArgumentTypeMismatchExceptionとなり、固定文言で返す
+        mockMvc.perform(get("/api/review-meetings").param("status", "INVALID_STATUS"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("リクエストの形式が不正です。"));
+
+        verify(reviewMeetingService, never()).getReviewMeetingAll(any(), any());
+    }
+
+    @Test
+    void GET_getReviewMeetingById_IDに数値以外_400を返す() throws Exception {
+        mockMvc.perform(get("/api/review-meetings/{id}", "abc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("リクエストの形式が不正です。"));
+
         verify(reviewMeetingService, never()).getReviewMeetingById(any());
     }
 }
