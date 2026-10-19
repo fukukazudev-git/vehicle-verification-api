@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 // multipart/form-data のフォーム項目をまとめて受け取る（@ModelAttribute でバインド）
 // ファイルもこのDTOに含めることで、OpenAPI(Swagger)のスキーマにファイル選択欄が出る
 // ファイル形式はファイル名の拡張子からサーバー側で判定するため、リクエストでは受け取らない
+// Swagger UIの初期値はOpenApiConfigで空にしている
 @Getter
 @Setter
 public class AttachmentUploadRequest {
