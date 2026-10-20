@@ -1,0 +1,38 @@
+# vehicle-verification-api を systemd で常駐させるための unit ファイル
+# 配置先: /etc/systemd/system/vehicle-verification-api.service
+# 手順は deploy/README.md を参照
+
+[Unit]
+Description=Vehicle Verification API (Spring Boot)
+# DBはRDS(EC2の外)なので、ネットワークが実際に使えるようになるまで待つ
+# network.target は「ネットワーク設定の開始」までしか保証しないため network-online.target を使う
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+# 専用のシステムユーザーで実行する(rootで動かさない)
+User=vvapi
+Group=vvapi
+WorkingDirectory=/opt/vehicle-verification-api
+
+# 秘密情報(DB接続情報・JWT秘密鍵など)はリポジトリ外のファイルから渡す
+# systemd が root 権限で読むため、ファイルは root:root 600 でよい
+EnvironmentFile=/etc/vehicle-verification/app.env
+
+ExecStart=/usr/bin/java -jar /opt/vehicle-verification-api/app.jar
+
+# Java は SIGTERM で停止すると終了コード143を返すので、正常終了として扱う
+SuccessExitStatus=143
+
+# 異常終了時のみ10秒待って再起動する(systemctl stop での停止は再起動しない)
+Restart=on-failure
+RestartSec=10
+
+# 標準出力・標準エラーは journald に流す(journalctl -u vehicle-verification-api で確認)
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+# 通常のマルチユーザー起動時(GUIなしのサーバー起動)に自動起動する
+WantedBy=multi-user.target
