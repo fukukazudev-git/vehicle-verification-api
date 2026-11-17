@@ -1,6 +1,7 @@
 package com.example.vehicleverification.presentation.advice;
 
 import com.example.vehicleverification.domain.exception.DuplicateResourceException;
+import com.example.vehicleverification.domain.exception.LoginLockedException;
 import com.example.vehicleverification.domain.exception.ResourceInUseException;
 import com.example.vehicleverification.domain.exception.ResourceNotFoundException;
 import com.example.vehicleverification.presentation.dto.error.ErrorResponse;
@@ -129,6 +130,22 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 null);
 
         return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(LoginLockedException.class)
+    public ResponseEntity<ErrorResponse> handleLoginLocked(LoginLockedException ex, HttpServletRequest request) {
+        // Retry-Afterヘッダーを設定する
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getRetryAfterSeconds()));
+
+        ErrorResponse body = new ErrorResponse(
+                HttpStatus.TOO_MANY_REQUESTS.value(),
+                HttpStatus.TOO_MANY_REQUESTS.getReasonPhrase(),
+                "試行回数が上限に達しました。しばらくしてから再度お試しください。",
+                request.getRequestURI(),
+                null);
+
+        return new ResponseEntity<>(body, headers, HttpStatus.TOO_MANY_REQUESTS);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

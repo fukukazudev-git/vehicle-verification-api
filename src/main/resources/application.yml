@@ -27,6 +27,10 @@ server:
 jwt:
   secret: ${JWT_SECRET:local-dev-secret-key-must-be-at-least-32-characters}
   expiration: 86400000
+
+login-attempt:
+  max-failures: 5
+  lock-duration: 15m
   
 storage:
   local:
